@@ -38,30 +38,11 @@ def yatsm2pixels(_file, x=[], verbose=False):
     """
     if type(x) == int:
         x = [x]
-
-    # initialize things
     pixels = []
     records = yatsm2records(_file, verbose)
-    n = len(records)
-    pixel = []
-    px = -1
-
-    # loop through all records
-    for i in range(0, n):
-        ts = records[i]
-        # see if this record needs to be saved
-        if ((px < 0) and ((len(x)==0) or (ts['px'] in x))) or (px==ts['px']):
-            pixel.append(ts)
-            px = ts['px']
-        # see if this pixel is complete
-        if (len(pixel) > 0) and (px != ts['px']):
-            pixels.append(pixel)
-            if ts['px'] not in x:
-                pixel = []
-                px = -1
-            else:
-                pixel = [ts]
-                px = ts['px']
-
-    # done
+    if len(records) > 0:
+        pxs = records['px']
+        for px in pxs:
+            if (px in x) or (len(x)==0):
+                pixels.append(records[records['px']==px])
     return pixels
