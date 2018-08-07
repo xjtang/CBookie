@@ -51,9 +51,10 @@ class carbon:
         pool_record (): generate daily record for each pool
 
     """
-    dtypes = [('pool', 'U10'), ('subpool', 'U10'), ('id', '<u2'),
-                ('start', '<i4'), ('end', '<i4'), ('biomass', '<f4', (2, )),
-                ('func', 'U10'), ('coef', '<f4', (2, ))]
+    dtypes = [('pool', 'U10'), ('subpool', 'U10'), ('id', '<u2'), ('px', '<u2'),
+                ('py', '<u2'), ('start', '<i4'), ('end', '<i4'),
+                ('biomass', '<f4', (2, )), ('func', 'U10'),
+                ('coef', '<f4', (2, ))]
     pname = ['biomass', 'product', 'burned']
     spname = ['above', 'durable', 'fuel', 'pulp', 'burned']
     forest = [1, 5]
@@ -76,6 +77,8 @@ class carbon:
         self.start = 0
         self.end = 0
         self.p = para
+        self.px = pixel[0]['px']
+        self.py = pixel[0]['py']
         self.assess_pixel(pixel)
 
     def assess_pixel(self, pixel):
@@ -124,7 +127,7 @@ class carbon:
         biomass = get_biomass(self.p, ts['class'])
         flux = get_flux(self.p, ts['class'])
         self.pools.extend(np.array([(self.pname[0], self.spname[0], self.pid,
-                            ordinal_to_doy(ts['start']),
+                            self.px, self.py, ordinal_to_doy(ts['start']),
                             ordinal_to_doy(ts['end']), [biomass, 0],
                             flux['function'], (flux['coef1'], flux['coef2']))],
                             dtype=self.dtypes))
@@ -135,15 +138,16 @@ class carbon:
         self.pid += 1
         biomass = self.pools[self.pmain]['biomass'][1]
         self.pools.extend(np.array([(self.pname[2], self.spname[4], self.pid,
-                            self.last_break, 9999999, [biomass, biomass],
-                            'mineralize', [0, 0])], dtype=self.dtypes))
+                            self.px, self.py, self.last_break, 9999999,
+                            [biomass, biomass], 'mineralize', [0, 0])],
+                            dtype=self.dtypes))
 
     def deforest(self):
         biomass = self.pools[self.pmain]['biomass'][1]
         for x in self.p[2]:
             self.pid += 1
             self.pools.extend(np.array([(self.pname[1], x['product'], self.pid,
-                                self.last_break, 9999999,
+                                self.px, self.py, self.last_break, 9999999,
                                 [biomass * x['fraction'], 0], x['function'],
                                 [x['coef1'], x['coef2']])], dtype=self.dtypes))
             if x['product'] == 'burned':
@@ -172,7 +176,8 @@ class carbon:
         for x in self.pools:
             if t >= x['start']:
                 if t <= x['end']:
-                    biomass_t = run_flux(x['biomass'][0], doy_to_ordinal(x['start']),
+                    biomass_t = run_flux(x['biomass'][0],
+                                        doy_to_ordinal(x['start']),
                                         doy_to_ordinal(t), x['func'], x['coef'])
                     emission_t = x['biomass'][0] - biomass_t
                     if x['pool'] == 'biomass':
