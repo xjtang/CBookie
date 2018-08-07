@@ -23,6 +23,7 @@ class test:
                     csv2ndarray(os.path.join(self.para, 'flux.csv')),
                     csv2ndarray(os.path.join(self.para, 'product.csv'))]
 
+        self.all = yatsm2pixels(self.line)
         self.f = yatsm2pixels(self.forest)[0]
         self.df = yatsm2pixels(self.deforest)[0]
         self.r = yatsm2pixels(self.regrow)[0]
