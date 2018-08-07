@@ -1,5 +1,6 @@
 """ Module for IO of table files
 """
+import os
 import csv
 import ast
 
@@ -91,3 +92,33 @@ def csv2ndarray(_file, header=True):
 
     # done
     return array
+
+
+def list2csv(_data, _file, overwrite=False):
+    """ write a list of lists into csv file
+
+    Args:
+        _data (list): a list of lists
+        _file (str): output file
+        overwrite (bool): overwrite or not
+
+    Returns:
+        0: successful
+        1: output already exists
+        2: error during process
+
+    """
+    # check if output already exists
+    if (not overwrite) and os.path.isfile(_file):
+        return 1
+
+    # write to csv
+    try:
+        with open(_file, 'w') as output:
+            _writer = csv.writer(output, lineterminator='\n')
+            _writer.writerows(_data)
+    except:
+        return 2
+
+    # done
+    return 0
