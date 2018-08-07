@@ -17,8 +17,12 @@ def yatsm2records(_file, verbose=False):
 
     """
     yatsm = np.load(_file)
-    records = yatsm['record']
-    n = len(records)
+    ks = yatsm.keys()
+    if 'record' in ks:
+        records = yatsm['record']
+    else:
+        records = yatsm[ks[0]]
+        n = len(records)
     if verbose:
         log.info('Total number of records: {}'.format(n))
     return records
@@ -41,7 +45,7 @@ def yatsm2pixels(_file, x=[], verbose=False):
     pixels = []
     records = yatsm2records(_file, verbose)
     if len(records) > 0:
-        pxs = records['px']
+        pxs = np.unique(records['px'])
         for px in pxs:
             if (px in x) or (len(x)==0):
                 pixels.append(records[records['px']==px])
