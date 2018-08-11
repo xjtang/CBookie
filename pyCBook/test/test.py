@@ -37,14 +37,23 @@ class test:
                 x['break'] = doy_to_ordinal(x['break'])
         return(carbon(self.p, pixel))
 
-    def record_carbon(self, pixel, des):
+    def record_carbon(self, pixel, des, overwrite=True):
         carbon = self.get_carbon(pixel)
         record = carbon.pool_record()
-        list2csv(record[0], des)
+        list2csv(record[0], des, overwrite)
+        return 0
+
+    def record_flux(self, pixel, des, overwrite=True):
+        carbon = self.get_carbon(pixel)
+        record = carbon.pool_record()
+        list2csv(record[1], des, overwrite)
         return 0
 
     def full_test(self):
         self.record_carbon(self.f, os.path.join(self.output, 'forest.csv'))
         self.record_carbon(self.df, os.path.join(self.output, 'deforest.csv'))
         self.record_carbon(self.r, os.path.join(self.output, 'regrow.csv'))
+        self.record_flux(self.f, os.path.join(self.output, 'forest2.csv'))
+        self.record_flux(self.df, os.path.join(self.output, 'deforest2.csv'))
+        self.record_flux(self.r, os.path.join(self.output, 'regrow2.csv'))
         return 0
