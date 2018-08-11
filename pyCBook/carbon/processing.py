@@ -1,5 +1,6 @@
 """ Module for processing when tracking carbon
 """
+import math
 
 
 def get_biomass(para, _class):
@@ -46,12 +47,18 @@ def run_flux(y1, x1, x2, func, coef):
         y2 (float): biomass at x2
 
     """
+    if x1 == x2:
+        return y1
     if func == 'linear':
-        y2 = y1 + coef[0] / 365.25 * (x2 - x1)
+        y2 = y1 * (1 - (x2 - x1) / (365.25 / coef[0]))
     elif func == 'log':
-        y2 = 0
+        y2 = y1 * math.exp(-(x2 - x1) / (365.25 / coef[0]))
+    elif func == 'const':
+        y2 = y1 + coef[0] * (x2 - x1) / 365.25
     elif func == 'none':
         y2 = y1
     else:
+        y2 = 0
+    if y2 < 0:
         y2 = 0
     return y2
