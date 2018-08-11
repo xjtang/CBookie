@@ -1,0 +1,10 @@
+'id','class','function','coef1','coef2'
+1,'forest','const',1,0
+2,'grassland','none',0,0
+3,'urban','none',0,0
+4,'pasture/cropland','none',0,0
+5,'regrowth/secondary','const',2,0
+6,'water','none',0,0
+7,'sand','none',0,0
+0,'unclassified','none',0,0
+15,'nodata','none',0,0
