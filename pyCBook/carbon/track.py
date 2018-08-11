@@ -185,6 +185,7 @@ class carbon:
                     elif x['pool'] == 'product':
                         biomass += biomass_t
                     else:
+                        emission_t = biomass_t
                         burned += emission_t
                 else:
                     emission_t = x['biomass'][0] - x['biomass'][1]
@@ -202,10 +203,15 @@ class carbon:
             biomass.append(-9999)
             net.append(-9999)
             if (t >= x['start']) & (t <= x['end']):
-                biomass[-1] = run_flux(x['biomass'][0],
-                                        doy_to_ordinal(x['start']),
-                                        doy_to_ordinal(t), x['func'], x['coef'])
-                net[-1] = x['biomass'][0] - biomass[-1]
+                if x['pool'] == 'burned':
+                    biomass[-1] = x['biomass'][0]
+                    net[-1] = x['biomass'][0]
+                else:
+                    biomass[-1] = run_flux(x['biomass'][0],
+                                            doy_to_ordinal(x['start']),
+                                            doy_to_ordinal(t), x['func'],
+                                            x['coef'])
+                    net[-1] = x['biomass'][0] - biomass[-1]
         return (biomass, net)
 
     def pool_record(self):
