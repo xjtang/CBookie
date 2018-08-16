@@ -1,9 +1,13 @@
 """ Module for carbon bookkeeping
 
     Args:
+        -p (pattern): searching pattern
+        -i (img): biomass bass image
+        -b (batch): batch process, thisjob and totaljob
         -R (recursive): recursive when seaching files
         --overwrite: overwrite or not
         ori: origin
+        para: parameter files location
         des: destination
 
 """
@@ -12,12 +16,12 @@ import sys
 import argparse
 import numpy as np
 
-from .common import log, get_files, show_progress, manage_batch, get_int
-from .io import yatsm2pixels, csv2ndarray
+from .common import log, get_files, manage_batch, get_int
+from .io import yatsm2pixels, csv2ndarray, image2array
 from .carbon import carbon
 
 
-def book_carbon(pattern, ori, para, des, overwrite=False, recursive=False,
+def book_carbon(pattern, ori, para, des, img='NA', overwrite=False, recursive=False,
                 batch=[1,1]):
     """ carbon bookkeeping on YATSM results
 
@@ -26,6 +30,7 @@ def book_carbon(pattern, ori, para, des, overwrite=False, recursive=False,
         ori (str): place to look for inputs
         para (str): place to look for parameters
         des (str): place to save outputs
+        img (str): biomass base image
         overwrite (bool): overwrite or not
         recursive (bool): recursive when searching file, or not
         batch (list, int): batch processing, [thisjob, totaljob]
@@ -35,7 +40,7 @@ def book_carbon(pattern, ori, para, des, overwrite=False, recursive=False,
         1: error due to des
         2: error when searching files
         3: found no file
-        4: error reading parameters
+        4: error reading inputs
         5: nothing is processed
 
     """
@@ -80,18 +85,32 @@ def book_carbon(pattern, ori, para, des, overwrite=False, recursive=False,
         log.error('Failed to read parameter from {}'.format(para))
         return 4
 
+    # reading biomass base image
+    if args.img != 'NA':
+        log.info('Reading biomass base image...')
+        try:
+            biomass = image2array(img, 1)
+        except:
+            log.error('Failed to read biomass bass image: {}'.format(img))
+            return 4
+    else:
+        se_biomass = -1
+
     # loop through all files
     count = 0
-    records = []
     log.info('Start booking carbon...')
     for yatsm in yatsm_list:
         try:
+            records = []
             py = get_int(yatsm[1])[0]
             log.info('Processing line {}'.format(py))
             pixels = yatsm2pixels(os.path.join(yatsm[0], yatsm[1]))
             if len(pixels) > 0:
                 for pixel in pixels:
-                    carbon_pixel = carbon(p, pixel)
+                    px = pixel[0]['px']
+                    if args.img != 'NA':
+                        se_biomass = biomass[py, px]
+                    carbon_pixel = carbon(p, pixel, se_biomass)
                     records.extend(carbon_pixel.pools)
             np.savez(os.path.join(des, 'carbon_r{}.npz'.format(py)), records)
             count += 1
@@ -119,6 +138,8 @@ if __name__ == '__main__':
     parser.add_argument('-b', '--batch', action='store', type=int, nargs=2,
                         dest='batch', default=[1,1],
                         help='batch process, [thisjob, totaljob]')
+    parser.add_argument('-i', '--image', action='store', type=str,
+                        dest='img', default='NA', help='biomass base image')
     parser.add_argument('-R', '--recursive', action='store_true',
                         help='recursive or not')
     parser.add_argument('--overwrite', action='store_true',
@@ -138,14 +159,17 @@ if __name__ == '__main__':
     log.info('Start carbon bookkeeping...')
     log.info('Running job {}/{}'.format(args.batch[0], args.batch[1]))
     log.info('Looking for {}'.format(args.pattern))
+
     log.info('In {}'.format(args.ori))
     log.info('Parameters in {}'.format(args.para))
     log.info('Saving in {}'.format(args.des))
+    if args.img != 'NA':
+        log.info('Biomass base image: {}'.format(args.img))
     if args.recursive:
         log.info('Recursive seaching.')
     if args.overwrite:
         log.info('Overwriting old files.')
 
     # run function to bookkeeping
-    book_carbon(args.pattern, args.ori, args.para, args.des, args.overwrite,
-                args.recursive, args.batch)
+    book_carbon(args.pattern, args.ori, args.para, args.des, args.img,
+                args.overwrite, args.recursive, args.batch)
