@@ -12,6 +12,7 @@ class carbon:
     Args:
         para (list, ndarray): parameters
         pixel (ndarray): yatsm result for a pixel
+        se_biomass (float): spatially explicit initial biomass
 
     Attributes:
         dtypes (dtype): template dtype for a carbon pool
@@ -21,6 +22,7 @@ class carbon:
         regrow_biomass (float): biomass of new regrow forest
 
     Variables:
+        se_biomass: spatially explicit initial biomass
         pools: carbon pools
         lc: land cover classes
         products: ids of product pools
@@ -51,16 +53,17 @@ class carbon:
         pool_record (): generate daily record for each pool
 
     """
-    dtypes = [('pool', 'U10'), ('subpool', 'U10'), ('id', '<u2'), ('px', '<u2'),
-                ('py', '<u2'), ('start', '<i4'), ('end', '<i4'),
-                ('biomass', '<f4', (2, )), ('func', 'U10'),
+    dtypes = [('pool', 'U10'), ('subpool', 'U10'), ('class', '<u2'),
+                ('id', '<u2'), ('px', '<u2'), ('py', '<u2'), ('start', '<i4'),
+                ('end', '<i4'), ('biomass', '<f4', (2, )), ('func', 'U10'),
                 ('coef', '<f4', (2, ))]
     pname = ['biomass', 'product', 'burned']
     spname = ['above', 'durable', 'fuel', 'pulp', 'burned']
     forest = [1, 5]
     regrow_biomass = 20.0
 
-    def __init__(self, para, pixel):
+    def __init__(self, para, pixel, se_biomass=-1.0):
+        self.se_biomass = se_biomass
         self.pools = []
         self.lc = []
         self.products = []
@@ -124,10 +127,14 @@ class carbon:
         self.pid += 1
         self.pmain = self.pid
         self.lc.append(ts['class'])
-        biomass = get_biomass(self.p, ts['class'])
+        if (self.pid == 0) & (self.se_biomass >= 0):
+            biomass = self.se_biomass
+        else:
+            biomass = get_biomass(self.p, ts['class'])
         flux = get_flux(self.p, ts['class'])
-        self.pools.extend(np.array([(self.pname[0], self.spname[0], self.pid,
-                            self.px, self.py, ordinal_to_doy(ts['start']),
+        self.pools.extend(np.array([(self.pname[0], self.spname[0], ts['class'],
+                            self.pid, self.px, self.py,
+                            ordinal_to_doy(ts['start']),
                             ordinal_to_doy(ts['end']), [biomass, 0],
                             flux['function'], (flux['coef1'], flux['coef2']))],
                             dtype=self.dtypes))
@@ -137,19 +144,20 @@ class carbon:
     def removal(self):
         self.pid += 1
         biomass = self.pools[self.pmain]['biomass'][1]
-        self.pools.extend(np.array([(self.pname[2], self.spname[4], self.pid,
-                            self.px, self.py, self.last_break, 9999999,
-                            [biomass, biomass], 'mineralize', [0, 0])],
+        self.pools.extend(np.array([(self.pname[2], self.spname[4], 99,
+                            self.pid, self.px, self.py, self.last_break,
+                            9999999, [biomass, biomass], 'mineralize', [0, 0])],
                             dtype=self.dtypes))
 
     def deforest(self):
         biomass = self.pools[self.pmain]['biomass'][1]
         for x in self.p[2]:
             self.pid += 1
-            self.pools.extend(np.array([(self.pname[1], x['product'], self.pid,
-                                self.px, self.py, self.last_break, 9999999,
-                                [biomass * x['fraction'], 0], x['function'],
-                                [x['coef1'], x['coef2']])], dtype=self.dtypes))
+            self.pools.extend(np.array([(self.pname[1], x['product'], 99,
+                                self.pid, self.px, self.py, self.last_break,
+                                9999999, [biomass * x['fraction'], 0],
+                                x['function'], [x['coef1'], x['coef2']])],
+                                dtype=self.dtypes))
             if x['product'] == 'burned':
                 self.pools[-1]['pool'] = self.pname[2]
             else:
@@ -219,6 +227,63 @@ class carbon:
         flux = [['Date'] + [x['subpool'] for x in self.pools]]
         for t in range(doy_to_ordinal(self.start), doy_to_ordinal(self.end)+1):
             record_t = self.eval_pools(ordinal_to_doy(t))
+            biomass.append([ordinal_to_doy(t)] + record_t[0])
+            flux.append([ordinal_to_doy(t)] + record_t[1])
+        return (biomass, flux)
+
+
+class pools:
+    """ track carbon based on time series segments
+
+    Args:
+        pools (ndarray): pools
+
+    Attributes:
+        dtypes (dtype): template dtype for a carbon pool
+
+    Variables:
+        pools: carbon pools
+        start: start date
+        end: end date
+
+    Functions:
+        eval (t): calculate biomass and flux for each pool at date t
+        record (): generate daily record for each pool
+
+    """
+    dtypes = [('pool', 'U10'), ('subpool', 'U10'), ('class', '<u2'),
+                ('id', '<u2'), ('px', '<u2'), ('py', '<u2'), ('start', '<i4'),
+                ('end', '<i4'), ('biomass', '<f4', (2, )), ('func', 'U10'),
+                ('coef', '<f4', (2, ))]
+
+    def __init__(self, pools):
+        self.pools = pools
+        self.start = pools[pools['subpool'] == 'above'][0]['start']
+        self.end = pools[pools['subpool'] == 'above'][-1]['end']
+
+    def eval(self, t):
+        biomass = []
+        net = []
+        for x in self.pools:
+            biomass.append(-9999)
+            net.append(-9999)
+            if (t >= x['start']) & (t <= x['end']):
+                if x['pool'] == 'burned':
+                    biomass[-1] = x['biomass'][0]
+                    net[-1] = x['biomass'][0]
+                else:
+                    biomass[-1] = run_flux(x['biomass'][0],
+                                            doy_to_ordinal(x['start']),
+                                            doy_to_ordinal(t), x['func'],
+                                            x['coef'])
+                    net[-1] = x['biomass'][0] - biomass[-1]
+        return (biomass, net)
+
+    def record(self):
+        biomass = [['Date'] + [x['subpool'] for x in self.pools]]
+        flux = [['Date'] + [x['subpool'] for x in self.pools]]
+        for t in range(doy_to_ordinal(self.start), doy_to_ordinal(self.end)+1):
+            record_t = self.eval(ordinal_to_doy(t))
             biomass.append([ordinal_to_doy(t)] + record_t[0])
             flux.append([ordinal_to_doy(t)] + record_t[1])
         return (biomass, flux)
