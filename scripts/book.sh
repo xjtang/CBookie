@@ -4,6 +4,7 @@
 
 # Input Arguments:
 #		-p searching pattern
+# 	-i biomass bass image
 #		-n number of jobs
 #		-R recursive
 #		--overwrite overwrite
