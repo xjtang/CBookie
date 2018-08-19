@@ -28,6 +28,12 @@ class test:
         self.f = yatsm2pixels(self.forest)[0]
         self.df = yatsm2pixels(self.deforest)[0]
         self.r = yatsm2pixels(self.regrow)[0]
+        self.f_c = self.get_carbon(self.f, self.se_biomass)
+        self.df_c = self.get_carbon(self.df, self.se_biomass)
+        self.r_c = self.get_carbon(self.r, -1)
+        self.f_p = self.get_pools(self.f_c.pools)
+        self.df_p = self.get_pools(self.df_c.pools)
+        self.r_p = self.get_pools(self.r_c.pools)
 
     def get_carbon(self, pixel, se_biomass):
         pixel = pixel.copy()
