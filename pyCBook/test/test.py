@@ -72,6 +72,13 @@ class test:
         self.record_flux(self.r, -1, os.path.join(self.output, 'regrow2.csv'))
         return 0
 
-    def plot(self, pools):
-        plot_pools(pools)
+    def plot(self, pixel, _which=0):
+        lookup = self.p[0]
+        above = pixel.pools[pixel.pools['subpool'] == 'above']
+        _class = get_class_string(above['class'], lookup)
+        px = pixel.pools[0]['px']
+        py = pixel.pools[0]['py']
+        title = 'Carbon pools for pixel ({} {}): {}'.format(px, py, _class)
+        record = pixel.record()[_which]
+        plot_pools(record, title)
         return 0
