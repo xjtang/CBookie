@@ -49,17 +49,17 @@ def plot_pixel(ori, lookup, px, py):
 
     # gen plot
     log.info('Generating plot...')
-    #try:
-    if True:
+    try:
         pixel = pools(pixel_pools)
         record = pixel.record()
         lookup = csv2ndarray(lookup)
-        _class = get_class_string(pixel.pools['class'], lookup)
+        above = pixel.pools[pixel.pools['subpool'] == 'above']
+        _class = get_class_string(above['class'], lookup)
         title = 'Carbon pools for pixel ({} {}): {}'.format(px, py, _class)
         plot_pools(record[0], title)
-    #except:
-    #    log.error('Failed to generate plot.')
-    #    return 4
+    except:
+        log.error('Failed to generate plot.')
+        return 4
 
     # done
     log.info('Process completed.')
