@@ -146,7 +146,7 @@ class carbon:
         biomass = self.pools[self.pmain]['biomass'][1]
         self.pools.extend(np.array([(self.pname[2], self.spname[4], 99,
                             self.pid, self.px, self.py, self.last_break,
-                            9999999, [biomass, biomass], 'mineralize', [0, 0])],
+                            9999999, [biomass, 0.0], 'released', [0, 0])],
                             dtype=self.dtypes))
 
     def deforest(self):
@@ -212,7 +212,10 @@ class carbon:
             net.append(-9999)
             if (t >= x['start']) & (t <= x['end']):
                 if x['pool'] == 'burned':
-                    biomass[-1] = x['biomass'][0]
+                    if t == x['start']:
+                        biomass[-1] = x['biomass'][0]
+                    else:
+                        biomass[-1] = -9999
                     net[-1] = x['biomass'][0]
                 else:
                     biomass[-1] = run_flux(x['biomass'][0],
@@ -269,7 +272,10 @@ class pools:
             net.append(-9999)
             if (t >= x['start']) & (t <= x['end']):
                 if x['pool'] == 'burned':
-                    biomass[-1] = x['biomass'][0]
+                    if t == x['start']:
+                        biomass[-1] = x['biomass'][0]
+                    else:
+                        biomass[-1] = -9999
                     net[-1] = x['biomass'][0]
                 else:
                     biomass[-1] = run_flux(x['biomass'][0],
