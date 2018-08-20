@@ -27,18 +27,21 @@ def plot_pools(records, title='Carbon Pools'):
     for i in range(1, len(pnames)):
         # calculate x and y
         pname = pnames[i]
-        y = data[data[:, i] > 0, i]
-        x = data[data[:, i] > 0, 0]
+        y = data[data[:, i] > -9999, i]
+        x = data[data[:, i] > -9999, 0]
         x = x // 1000 + (x - (x // 1000 * 1000)) / 365.25
         # figure our color
         if 'above' in pname:
-            color = 'b'
+            _format = 'b-'
         elif 'burned' in pname:
-            color = 'r'
+            if len(x) > 1:
+                _format = 'r-'
+            else:
+                _format = 'r*'
         else:
-            color = 'g'
+            _format = 'g-'
         # make plot
-        plot.plot(x, y, '{}-'.format(color), lw=2)
+        plot.plot(x, y, _format, lw=2)
 
     # juice up the plot
     plot.ylabel('Biomass (Mg C / ha.)')
