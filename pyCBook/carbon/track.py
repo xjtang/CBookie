@@ -90,8 +90,8 @@ class carbon:
                 self.start = ordinal_to_doy(x['start'])
                 self.start_biomass = get_biomass(self.p, x['class'])
             else:
-                if ordinal_to_doy(x['start'])+1 > self.pools[self.pmain]['end']:
-                    self.pools[self.pmain]['end'] = ordinal_to_doy(x['start'])-1
+                if ordinal_to_doy(x['start']+1) > self.pools[self.pmain]['end']:
+                    self.pools[self.pmain]['end'] = ordinal_to_doy(x['start']-1)
                     self.emission(self.pmain)
             self.assess_ts(x)
             if i == (len(pixel) - 1):
