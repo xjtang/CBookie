@@ -1,5 +1,5 @@
 'id','class','function','coef1','coef2'
-1,'forest','const',1,0
+1,'forest','const',0.5,0
 2,'grassland','none',0,0
 3,'urban','none',0,0
 4,'pasture/cropland','none',0,0
