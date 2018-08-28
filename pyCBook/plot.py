@@ -3,12 +3,13 @@
 import os
 import numpy as np
 
-from .common import log, get_files, get_int, plot_pools, get_class_string
+from .common import (log, get_files, get_int, plot_pools, get_class_string,
+                        plot_book)
 from .io import yatsm2records, csv2ndarray
 from .carbon import pools
 
 
-def plot_pixel(ori, lookup, px, py):
+def plot_pixel(ori, lookup, px, py, _which=0, des='NA'):
     """ plot bookkeeping result for a pixxel
 
     Args:
@@ -16,6 +17,8 @@ def plot_pixel(ori, lookup, px, py):
         lookup (str): look up table for classes
         px (int): pixel x location
         py (int): pixel y location
+        _which (int): 0 for biomass, 1 for emission
+        des (str): output file if wanted
 
     Returns:
         0: successful
@@ -56,10 +59,45 @@ def plot_pixel(ori, lookup, px, py):
         above = pixel.pools[pixel.pools['subpool'] == 'above']
         _class = get_class_string(above['class'], lookup)
         title = 'Carbon pools for pixel ({} {}): {}'.format(px, py, _class)
-        plot_pools(record[0], title)
+        plot_pools(record[_which], title, des)
     except:
         log.error('Failed to generate plot.')
         return 4
+
+    # done
+    log.info('Process completed.')
+    return 0
+
+
+def plot_report(ori, des='NA'):
+    """ plot bookkeeping result for a pixxel
+
+    Args:
+        ori (str): place to look for results
+        des (str): output file if wanted
+
+    Returns:
+        0: successful
+        1: error reading input
+        2: error ploting
+
+    """
+    # get pixel pools
+    log.info('Reading input...')
+    try:
+        data = csv2ndarray(ori)
+    except:
+        log.error('Failed to read {}'.format(ori))
+        return 1
+
+    # gen plot
+    log.info('Generating plot...')
+    try:
+        title = 'Carbon Bookkeeping: {}'.format(os.path.basename(ori))
+        plot_book(data, title, des)
+    except:
+        log.error('Failed to generate plot.')
+        return 2
 
     # done
     log.info('Process completed.')
