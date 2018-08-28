@@ -150,7 +150,7 @@ def get_int(x):
         y (list, int): int in the string
 
     """
-    return map(int, re.findall('\d+', x))
+    return list(map(int, re.findall('\d+', x)))
 
 
 def doy_to_ordinal(doy):
