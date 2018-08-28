@@ -86,7 +86,7 @@ def book_carbon(pattern, ori, para, des, img='NA', overwrite=False, recursive=Fa
         return 4
 
     # reading biomass base image
-    if args.img != 'NA':
+    if img != 'NA':
         log.info('Reading biomass base image...')
         try:
             biomass = image2array(img, 1)
@@ -103,15 +103,17 @@ def book_carbon(pattern, ori, para, des, img='NA', overwrite=False, recursive=Fa
         try:
             records = []
             py = get_int(yatsm[1])[0]
+            px = -1
             log.info('Processing line {}'.format(py))
             pixels = yatsm2pixels(os.path.join(yatsm[0], yatsm[1]))
             if len(pixels) > 0:
                 for pixel in pixels:
                     px = pixel[0]['px']
-                    if args.img != 'NA':
+                    if img != 'NA':
                         se_biomass = biomass[py, px]
                     carbon_pixel = carbon(p, pixel, se_biomass)
                     records.extend(carbon_pixel.pools)
+            records = np.array(records)
             np.savez(os.path.join(des, 'carbon_r{}.npz'.format(py)), records)
             count += 1
         except:
@@ -159,7 +161,6 @@ if __name__ == '__main__':
     log.info('Start carbon bookkeeping...')
     log.info('Running job {}/{}'.format(args.batch[0], args.batch[1]))
     log.info('Looking for {}'.format(args.pattern))
-
     log.info('In {}'.format(args.ori))
     log.info('Parameters in {}'.format(args.para))
     log.info('Saving in {}'.format(args.des))
