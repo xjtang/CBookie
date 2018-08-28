@@ -45,7 +45,7 @@ def plot_pools(records, title='Carbon Pools', des='NA'):
         plot.plot(x, y, _format, lw=2)
 
     # juice up the plot
-    plot.ylabel('Biomass (Mg C)')
+    plot.ylabel('Carbon (Mg C)')
     plot.xlabel('Date')
     plot.title(title)
     plot.grid(True)
@@ -78,7 +78,7 @@ def plot_book(book, title='Carbon Pools', des='NA'):
     plot.plot(x, book['emission'], 'r-', lw=2)
     plot.plot(x, book['productivity'], 'g-', lw=2)
     # juice up the plot
-    plot.ylabel('Biomass (Mg C)')
+    plot.ylabel('Carbon (Mg C)')
     plot.xlabel('Date')
     plot.title(title)
     plot.grid(True)
