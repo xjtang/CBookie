@@ -345,8 +345,9 @@ class pools:
         return np.array([(t, biomass, emission, productivity, net)],
                         dtype=self.dtypes2)
 
-    def report(self, period):
+    def report(self, period, lapse=1):
         r = []
-        for t in range(doy_to_ordinal(period[0]), doy_to_ordinal(period[1])+1):
+        for t in range(doy_to_ordinal(period[0]), doy_to_ordinal(period[1]) + 1, 
+                        lapse):
             r.extend(self.eval_sum(ordinal_to_doy(t)))
         return np.array(r)

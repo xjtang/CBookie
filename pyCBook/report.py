@@ -3,6 +3,7 @@
     Args:
         -p (pattern): searching pattern
         -t (time): report time frame
+        -l (lapse): reporting interval
         -R (recursive): recursive when seaching files
         --overwrite: overwrite or not
         ori: origin
@@ -18,7 +19,8 @@ from .io import yatsm2pixels, csv2ndarray, image2array
 from .carbon import pools
 
 
-def report_carbon(pattern, period, ori, des, overwrite=False, recursive=False):
+def report_carbon(pattern, period, ori, des, lapse=1, overwrite=False,
+                    recursive=False):
     """ carbon reporting from bookkeeping results
 
     Args:
@@ -26,6 +28,7 @@ def report_carbon(pattern, period, ori, des, overwrite=False, recursive=False):
         period (list, int): reporting time period, [start, end]
         ori (str): place to look for inputs
         des (str): place to save outputs
+        laspe (int): reporting interval
         overwrite (bool): overwrite or not
         recursive (bool): recursive when searching file, or not
 
@@ -63,7 +66,7 @@ def report_carbon(pattern, period, ori, des, overwrite=False, recursive=False):
                 ('productivity', '<f4'), ('net', '<f4')]
     r = np.array([(ordinal_to_doy(x), 0, 0, 0,
                     0) for x in range(doy_to_ordinal(period[0]),
-                    doy_to_ordinal(period[1]) + 1)], dtype=dtypes)
+                    doy_to_ordinal(period[1]) + 1, lapse)], dtype=dtypes)
 
     # loop through all files
     lcount = 0
@@ -79,7 +82,7 @@ def report_carbon(pattern, period, ori, des, overwrite=False, recursive=False):
                 for pixel in pixels:
                     px = pixel[0]['px']
                     pixel_pools = pools(pixel)
-                    record = pixel_pools.report(period)
+                    record = pixel_pools.report(period, lapse)
                     r['biomass'] += record['biomass']
                     r['emission'] += record['emission']
                     r['productivity'] += record['productivity']
@@ -121,6 +124,8 @@ if __name__ == '__main__':
     parser.add_argument('-t', '--time', action='store', type=int, nargs=2,
                         dest='period', default=[2000001,2015365],
                         help='reporting period, [start, end]')
+    parser.add_argument('-l', '--lapse', action='store', type=int,
+                        dest='lapse', default=1, help='reporting interval')
     parser.add_argument('-R', '--recursive', action='store_true',
                         help='recursive or not')
     parser.add_argument('--overwrite', action='store_true',
@@ -132,6 +137,7 @@ if __name__ == '__main__':
     # print logs
     log.info('Start carbon reporting...')
     log.info('Reporting period {} to {}'.format(args.period[0], args.period[1]))
+    log.info('Reporting every {} days.'.format(args.lapse))
     log.info('Looking for {}'.format(args.pattern))
     log.info('In {}'.format(args.ori))
     log.info('Saving as {}'.format(args.des))
@@ -141,5 +147,5 @@ if __name__ == '__main__':
         log.info('Overwriting old files.')
 
     # run function to report carbon
-    report_carbon(args.pattern, args.period, args.ori, args.des, args.overwrite,
-                    args.recursive)
+    report_carbon(args.pattern, args.period, args.ori, args.des, args.lapse,
+                    args.overwrite, args.recursive)
