@@ -11,7 +11,7 @@
 #		des: destination
 
 # default values
-pattern=yatsm_r*.npz
+pattern=carbon_r*.npz
 t1=2000001
 t2=2015365
 overwrite=''
