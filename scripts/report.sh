@@ -14,6 +14,7 @@
 pattern=carbon_r*.npz
 t1=2000001
 t2=2015365
+lapse=1
 overwrite=''
 recursive=''
 
@@ -29,6 +30,10 @@ while [[ $# > 0 ]]; do
 			t1=$2
 			t2=$3
 			shift
+			shift
+			;;
+		-l)
+			lapse=$2
 			shift
 			;;
 		-R)
@@ -47,4 +52,4 @@ done
 
 # submit jobs
 echo 'Submitting job to report.'
-qsub -j y -N Report -V -b y cd /projectnb/landsat/users/xjtang/documents/CBookie';' python -m pyCBook.report ${overwrite}${recursive}-p $pattern -t $t1 $t2 $ori $des
+qsub -j y -N Report -V -b y cd /projectnb/landsat/users/xjtang/documents/CBookie';' python -m pyCBook.report ${overwrite}${recursive}-p $pattern -l $lapse -t $t1 $t2 $ori $des
