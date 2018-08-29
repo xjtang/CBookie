@@ -29,6 +29,7 @@ while [[ $# > 0 ]]; do
 			t1=$2
 			t2=$3
 			shift
+			shift
 			;;
 		-R)
 			recursive='-R '
