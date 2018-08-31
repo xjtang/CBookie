@@ -10,7 +10,7 @@ from .carbon import pools
 
 
 def plot_pixel(ori, lookup, px, py, _which=0, des='NA'):
-    """ plot bookkeeping result for a pixxel
+    """ plot bookkeeping result for a pixel
 
     Args:
         ori (str): place to look for results
@@ -58,8 +58,14 @@ def plot_pixel(ori, lookup, px, py, _which=0, des='NA'):
         lookup = csv2ndarray(lookup)
         above = pixel.pools[pixel.pools['subpool'] == 'above']
         _class = get_class_string(above['class'], lookup)
-        title = 'Carbon pools for pixel ({} {}): {}'.format(px, py, _class)
-        plot_pools(record[_which], title, des)
+        if _which == 0:
+            title = 'Carbon pools for pixel ({} {}): {}'.format(px, py, _class)
+            ylabel = 'Carbon Density (Mg C / ha.)'
+        else:
+            title = 'Cumulative emission for pixel ({} {}): {}'.format(px, py,
+                                                                        _class)
+            ylabel = 'Cumulative Emission (Mg C / ha.)'
+        plot_pools(record[_which], title, ylabel, des)
     except:
         log.error('Failed to generate plot.')
         return 4
