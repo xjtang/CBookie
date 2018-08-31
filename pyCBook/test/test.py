@@ -82,9 +82,15 @@ class test:
         _class = get_class_string(above['class'], lookup)
         px = pixel.pools[0]['px']
         py = pixel.pools[0]['py']
-        title = 'Carbon pools for pixel ({} {}): {}'.format(px, py, _class)
+        if _which == 0:
+            title = 'Carbon pools for pixel ({} {}): {}'.format(px, py, _class)
+            ylabel = 'Carbon Density (Mg C / ha.)'
+        else:
+            title = 'Cumulative emission for pixel ({} {}): {}'.format(px, py,
+                                                                        _class)
+            ylabel = 'Cumulative Emission (Mg C / ha.)'
         record = pixel.record()[_which]
-        plot_pools(record, title, des)
+        plot_pools(record, title, ylabel, des)
         return 0
 
     def report(self):

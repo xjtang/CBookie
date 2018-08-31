@@ -8,7 +8,8 @@ import numpy as np
 import matplotlib.pyplot as plot
 
 
-def plot_pools(records, title='Carbon Pools', des='NA'):
+def plot_pools(records, title='Carbon Pools',
+                ylabel='Carbon Density (Mg C / ha.)', des='NA'):
     """ plot carbon pools
 
     Args:
@@ -45,7 +46,7 @@ def plot_pools(records, title='Carbon Pools', des='NA'):
         plot.plot(x, y, _format, lw=2)
 
     # juice up the plot
-    plot.ylabel('Carbon (Mg C)')
+    plot.ylabel(ylabel)
     plot.xlabel('Date')
     plot.title(title)
     plot.grid(True)
@@ -59,7 +60,7 @@ def plot_pools(records, title='Carbon Pools', des='NA'):
     return 0
 
 
-def plot_book(book, title='Carbon Pools', des='NA'):
+def plot_book(book, title='Cumulative Emission', des='NA'):
     """ plot bookkeeping results
 
     Args:
@@ -78,7 +79,7 @@ def plot_book(book, title='Carbon Pools', des='NA'):
     plot.plot(x, book['emission'], 'r-', lw=2)
     plot.plot(x, book['productivity'], 'g-', lw=2)
     # juice up the plot
-    plot.ylabel('Carbon (Mg C)')
+    plot.ylabel('Cumulative Emission (Mg C / ha.)')
     plot.xlabel('Date')
     plot.title(title)
     plot.grid(True)
