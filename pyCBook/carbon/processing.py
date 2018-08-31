@@ -49,7 +49,6 @@ def run_flux(y1, x1, x2, func, coef, scale_factor):
         y2 (float): biomass at x2
 
     """
-    coef = coef * scale_factor
     if x1 == x2:
         return y1
     if func == 'linear':
@@ -57,7 +56,7 @@ def run_flux(y1, x1, x2, func, coef, scale_factor):
     elif func == 'log':
         y2 = y1 * math.exp(-(x2 - x1) / (365.25 / coef[0]))
     elif func == 'const':
-        y2 = y1 + coef[0] * (x2 - x1) / 365.25
+        y2 = y1 + coef[0] * scale_factor * (x2 - x1) / 365.25
     elif func == 'none':
         y2 = y1
     else:

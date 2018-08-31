@@ -10,6 +10,8 @@
         des: destination
 
 """
+from __future__ import division
+
 import os
 import argparse
 import numpy as np
@@ -94,9 +96,14 @@ def report_carbon(pattern, period, ori, des, lapse=1, overwrite=False,
             continue
 
     # nothing is processed, all failed
-    if lcount == 0:
+    if pcount == 0:
         log.error('Failed to process anything.')
         return 4
+    else:
+        r['biomass'] = r['biomass'] / pcount
+        r['emission'] = r['emission'] / pcount
+        r['productivity'] = r['productivity'] / pcount
+        r['net'] = r['net'] / pcount
 
     # write output
     log.info('Writing output...')

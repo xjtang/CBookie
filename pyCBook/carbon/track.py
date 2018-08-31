@@ -64,8 +64,8 @@ class carbon:
     spname = ['above', 'durable', 'fuel', 'pulp', 'burned']
     forest = [1, 5]
     seb_class = [1, 2, 3, 5]
-    regrow_biomass = 20.0
-    scale_factor = (30 * 30) / (100 * 100) * 0.5
+    regrow_biomass = 0.0
+    scale_factor = 0.5
     force_start = doy_to_ordinal(2000001)
 
     def __init__(self, para, pixel, se_biomass=-1.0):
@@ -280,7 +280,7 @@ class pools:
                 ('coef', '<f4', (2, ))]
     dtypes2 = [('date', '<i4'), ('biomass', '<f4'), ('emission', '<f4'),
                 ('productivity', '<f4'), ('net', '<f4')]
-    scale_factor = (30 * 30) / (100 * 100) * 0.5
+    scale_factor = 0.5
 
     def __init__(self, pools):
         self.pools = pools
@@ -347,7 +347,7 @@ class pools:
 
     def report(self, period, lapse=1):
         r = []
-        for t in range(doy_to_ordinal(period[0]), doy_to_ordinal(period[1]) + 1, 
+        for t in range(doy_to_ordinal(period[0]), doy_to_ordinal(period[1]) + 1,
                         lapse):
             r.extend(self.eval_sum(ordinal_to_doy(t)))
         return np.array(r)
