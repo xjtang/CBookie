@@ -5,6 +5,9 @@
 # Input Arguments:
 #		-p searching pattern
 # 	-t report period
+#		-i reporting lapse
+#		-n number of jobs
+#		-l line by line processing
 #		-R recursive
 #		--overwrite overwrite
 #		ori: origin
@@ -14,9 +17,11 @@
 pattern=carbon_r*.npz
 t1=2000001
 t2=2015365
+njob=1
 lapse=1
 overwrite=''
 recursive=''
+line=''
 
 # parse input arguments
 while [[ $# > 0 ]]; do
@@ -26,15 +31,22 @@ while [[ $# > 0 ]]; do
 			pattern=$2
 			shift
 			;;
+		-n)
+			njob=$2
+			shift
+			;;
 		-t)
 			t1=$2
 			t2=$3
 			shift
 			shift
 			;;
-		-l)
+		-i)
 			lapse=$2
 			shift
+			;;
+		-l)
+			line='-l '
 			;;
 		-R)
 			recursive='-R '
@@ -51,5 +63,8 @@ while [[ $# > 0 ]]; do
 done
 
 # submit jobs
-echo 'Submitting job to report.'
-qsub -j y -N Report -V -b y cd /projectnb/landsat/users/xjtang/documents/CBookie';' python -m pyCBook.report ${overwrite}${recursive}-p $pattern -l $lapse -t $t1 $t2 $ori $des
+echo 'Total jobs to submit is' $njob
+for i in $(seq 1 $njob); do
+    echo 'Submitting job no.' $i 'out of' $njob
+		qsub -j y -N Report_$i -V -b y cd /projectnb/landsat/users/xjtang/documents/CBookie';' python -m pyCBook.report ${overwrite}${recursive}$line-p $pattern -i $lapse -t $t1 $t2 -b $i $njob $ori $des
+done
