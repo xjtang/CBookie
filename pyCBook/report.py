@@ -80,15 +80,16 @@ def report_line(pattern, period, ori, des, lapse=1, overwrite=False,
     # initialize output
     dtypes = [('date', '<i4'), ('biomass', '<f4'), ('emission', '<f4'),
                 ('productivity', '<f4'), ('net', '<f4')]
-    r = np.array([(ordinal_to_doy(x), 0, 0, 0,
-                    0) for x in range(doy_to_ordinal(period[0]),
-                    doy_to_ordinal(period[1]) + 1, lapse)], dtype=dtypes)
 
     # loop through all files
     lcount = 0
     log.info('Start reporting carbon...')
     for _line in carbon_list:
         try:
+            r = np.array([(ordinal_to_doy(x), 0, 0, 0,
+                            0) for x in range(doy_to_ordinal(period[0]),
+                            doy_to_ordinal(period[1]) + 1, lapse)],
+                            dtype=dtypes)
             pcount = 0
             py = get_int(_line[1])[0]
             px = -1
@@ -107,15 +108,13 @@ def report_line(pattern, period, ori, des, lapse=1, overwrite=False,
             # nothing is processed for this line
             if pcount == 0:
                 log.warning('Processed nothing for line {}.'.format(py))
+            try:
+                np.savez(os.path.join(des, 'report_r{}_c{}.npz'.format(py,
+                                        pcount)), r)
+                lcount += 1
+            except:
+                log.warning('Failed to write output for line {}'.format(py))
                 continue
-            else:
-                try:
-                    np.savez(os.path.join(des, 'report_r{}_c{}.npz'.format(py,
-                                            pcount)), r)
-                    lcount += 1
-                except:
-                    log.warning('Failed to write output for line {}'.format(py))
-                    continue
         except:
             log.warning('Failed to process line {} pixel {}.'.format(py, px))
             continue
