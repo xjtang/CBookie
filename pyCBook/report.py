@@ -86,9 +86,13 @@ def report_line(pattern, period, ori, des, lapse=1, overwrite=False,
     log.info('Start reporting carbon...')
     for _line in carbon_list:
         try:
-            r = np.array([(ordinal_to_doy(x), 0, 0, 0,
-                            0) for x in range(doy_to_ordinal(period[0]),
-                            doy_to_ordinal(period[1]) + 1, lapse)],
+            if max(period) < 3000:
+                period2 = [doy_to_ordinal(x * 1000 + 1) for x in range(period[0],
+                            period[1] + 1)]
+            else:
+                period2 = range(doy_to_ordinal(period[0]),
+                                doy_to_ordinal(period[1]) + 1, lapse)
+            r = np.array([(ordinal_to_doy(x), 0, 0, 0, 0) for x in period2],
                             dtype=dtypes)
             pcount = 0
             py = get_int(_line[1])[0]

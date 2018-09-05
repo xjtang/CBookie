@@ -347,7 +347,12 @@ class pools:
 
     def report(self, period, lapse=1):
         r = []
-        for t in range(doy_to_ordinal(period[0]), doy_to_ordinal(period[1]) + 1,
-                        lapse):
+        if max(period) < 3000:
+            period2 = [doy_to_ordinal(x * 1000 + 1) for x in range(period[0],
+                        period[1] + 1)]
+        else:
+            period2 = range(doy_to_ordinal(period[0]),
+                            doy_to_ordinal(period[1]) + 1, lapse)
+        for t in period2:
             r.extend(self.eval_sum(ordinal_to_doy(t)))
         return np.array(r)
