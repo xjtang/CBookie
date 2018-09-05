@@ -72,8 +72,12 @@ class test:
         self.plot(self.df_p, 1, os.path.join(self.figure, 'deforest_e.png'))
         self.plot(self.r_p, 0, os.path.join(self.figure, 'regrow.png'))
         self.plot(self.r_p, 1, os.path.join(self.figure, 'regrow_e.png'))
-        plt.plot_report(os.path.join(self.output, 'report.csv'),
-                        os.path.join(self.figure, 'report.png'))
+        plt.plot_report(os.path.join(self.output, 'report_daily.csv'),
+                        os.path.join(self.figure, 'report_daily.png'))
+        plt.plot_report(os.path.join(self.output, 'report_annual.csv'),
+                        os.path.join(self.figure, 'report_annual_cum.png'))
+        plt.plot_report(os.path.join(self.output, 'report_annual.csv'),
+                        os.path.join(self.figure, 'report_annual.png'), False)
         return 0
 
     def plot(self, pixel, _which=0, des='NA'):
