@@ -75,17 +75,19 @@ def plot_pixel(ori, lookup, px, py, _which=0, des='NA'):
     return 0
 
 
-def plot_report(ori, des='NA'):
+def plot_report(ori, des='NA',cum=True):
     """ plot bookkeeping result for a pixxel
 
     Args:
         ori (str): place to look for results
         des (str): output file if wanted
+        cum (bool): cumulative or not
 
     Returns:
         0: successful
         1: error reading input
-        2: error ploting
+        2: error processing data
+        3: error ploting
 
     """
     # get pixel pools
@@ -96,14 +98,31 @@ def plot_report(ori, des='NA'):
         log.error('Failed to read {}'.format(ori))
         return 1
 
+    if not cum:
+        # calculating non-cumulative results
+        log.info('Calculating non-cumulative results...')
+        try:
+            for i in range(len(data) - 1, 0, -1):
+                data[i]['net'] -= data[i - 1]['net']
+                data[i]['emission'] -= data[i - 1]['emission']
+                data[i]['productivity'] -= data[i - 1]['productivity']
+        except:
+            log.error('Failed to calculate non-cumulative results')
+            return 2
+        ylabel = 'Emission (Mg C / ha. / year)'
+        bar = True
+    else:
+        ylabel = 'Cumulative Emission (Mg C / ha.)'
+        bar = False
+
     # gen plot
     log.info('Generating plot...')
     try:
         title = 'Carbon Bookkeeping: {}'.format(os.path.basename(ori))
-        plot_book(data, title, des)
+        plot_book(data, bar, title, ylabel, des)
     except:
         log.error('Failed to generate plot.')
-        return 2
+        return 3
 
     # done
     log.info('Process completed.')

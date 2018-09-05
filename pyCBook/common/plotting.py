@@ -15,6 +15,7 @@ def plot_pools(records, title='Carbon Pools',
     Args:
         records (list): input data
         title (str): plot main title
+        ylabel (str): plot ylabel
         des (str): output file
 
     Returns:
@@ -60,12 +61,14 @@ def plot_pools(records, title='Carbon Pools',
     return 0
 
 
-def plot_book(book, title='Cumulative Emission', des='NA'):
+def plot_book(book, bar=False, title='Cumulative Emission',
+                ylabel='Cumulative Emission (Mg C / ha.)', des='NA'):
     """ plot bookkeeping results
 
     Args:
         book (ndarray): input data
         title (str): plot main title
+        ylabel (str): plot ylabel
         des (str): output file
 
     Returns:
@@ -75,11 +78,16 @@ def plot_book(book, title='Cumulative Emission', des='NA'):
     # calculate x
     x = book['date']//1000 + (book['date'] - (book['date']//1000*1000)) / 365.25
     # make plot
-    plot.plot(x, book['net'], '--', c='0.5', lw=1)
-    plot.plot(x, book['emission'], 'r-', lw=2)
-    plot.plot(x, book['productivity'], 'g-', lw=2)
+    if bar:
+        plot.bar(x, book['emission'], color='red')
+        plot.bar(x, book['productivity'], color='green')
+        plot.plot(x, book['net'], '--', c='0.5', lw=1)
+    else:
+        plot.plot(x, book['net'], '--', c='0.5', lw=1)
+        plot.plot(x, book['emission'], 'r-', lw=2)
+        plot.plot(x, book['productivity'], 'g-', lw=2)
     # juice up the plot
-    plot.ylabel('Cumulative Emission (Mg C / ha.)')
+    plot.ylabel(ylabel)
     plot.xlabel('Date')
     plot.title(title)
     plot.grid(True)
