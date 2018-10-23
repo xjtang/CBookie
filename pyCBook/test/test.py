@@ -16,9 +16,9 @@ class test:
     """
     wd = '/Users/xjtang/Applications/GitHub/CBookie/'
     para = os.path.join(wd, 'parameters/Colombia/')
-    input = os.path.join(wd, 'pyCBook/test/inputs/')
-    output = os.path.join(wd, 'pyCBook/test/outputs/')
-    figure = os.path.join(wd, 'pyCBook/test/plots/')
+    input = os.path.join(wd, 'pyCBook/test/data/carbon/inputs/')
+    output = os.path.join(wd, 'pyCBook/test/data/carbon/outputs/')
+    figure = os.path.join(wd, 'pyCBook/test/data/carbon/plots/')
     se_biomass = -1
 
     def __init__(self):
@@ -61,8 +61,6 @@ class test:
     def rerun(self):
         book.book_carbon('yatsm_r*.npz', self.input, self.para, self.output,
                             'NA', True, True)
-        rpt.report_carbon('carbon_r*.npz', [2000001, 2010365], self.output,
-                            os.path.join(self.output, 'report.csv'), True, True)
         return 0
 
     def plot_all(self):
@@ -97,11 +95,6 @@ class test:
         plot_pools(record, title, ylabel, des)
         return 0
 
-    def report(self):
-        rpt.report_carbon('*.npz', [2000001, 2010365], self.input,
-                            os.path.join(self.output, 'report.csv'), True, True)
-        return 0
-
 
 class test2:
     """ testing
@@ -123,3 +116,72 @@ class test2:
         plot.grid(True)
         plot.show()
         return 0
+
+
+class test3:
+    """ testing
+    """
+    wd = '/Users/xjtang/Applications/GitHub/CBookie/'
+    para = os.path.join(wd, 'parameters/Colombia/')
+    input = os.path.join(wd, 'pyCBook/test/data/uncertainty/inputs/')
+    output = os.path.join(wd, 'pyCBook/test/data/uncertainty/outputs/')
+    reports = os.path.join(wd, 'pyCBook/test/data/uncertainty/reports/')
+    daily = os.path.join(wd, 'pyCBook/test/data/uncertainty/reports/daily')
+    annual = os.path.join(wd, 'pyCBook/test/data/uncertainty/reports/annual')
+    figure = os.path.join(wd, 'pyCBook/test/data/uncertainty/plots/')
+    se_biomass = -1
+
+    def __init__(self):
+        self.p = [csv2ndarray(os.path.join(self.para, 'biomass.csv')),
+                    csv2ndarray(os.path.join(self.para, 'flux.csv')),
+                    csv2ndarray(os.path.join(self.para, 'product.csv'))]
+        self.model = yatsm2records(os.path.join(self.input, 'yatsm_r1.npz'))
+        self.real = yatsm2records(os.path.join(self.input, 'yatsm_r2.npz'))
+        self.fixed = yatsm2records(os.path.join(self.input, 'yatsm_r3.npz'))
+        self.model_c = self.get_carbon(self.model, self.se_biomass)
+        self.real_c = self.get_carbon(self.real, self.se_biomass)
+        self.fixed_c = self.get_carbon(self.fixed, self.se_biomass)
+        self.model_p = self.get_pools(self.model_c.pools)
+        self.real_p = self.get_pools(self.real_c.pools)
+        self.fixed_p = self.get_pools(self.fixed_c.pools)
+
+    def rerun(self):
+        book.book_carbon('yatsm_r*.npz', self.input, self.para, self.output,
+                            'NA', True, True)
+        rpt.report_line('carbon_r*.npz', [1990001, 2015365], self.output,
+                            self.daily, 1, True, True)
+        rpt.report_line('carbon_r*.npz', [1990001, 2015365], self.output,
+                            self.annual, 365, True, True)
+        rpt.report_sum('report_r1*.npz', self.daily, os.path.join(self.reports,
+                        'model_daily.csv'), True, True)
+        rpt.report_sum('report_r2*.npz', self.daily, os.path.join(self.reports,
+                        'real_daily.csv'), True, True)
+        rpt.report_sum('report_r3*.npz', self.daily, os.path.join(self.reports,
+                        'fixed_daily.csv'), True, True)
+        rpt.report_sum('report_r1*.npz', self.annual, os.path.join(self.reports,
+                        'model_annual.csv'), True, True)
+        rpt.report_sum('report_r2*.npz', self.annual, os.path.join(self.reports,
+                        'real_annual.csv'), True, True)
+        rpt.report_sum('report_r3*.npz', self.annual, os.path.join(self.reports,
+                        'fixed_annual.csv'), True, True)
+        return 0
+
+    def get_carbon(self, pixel, se_biomass):
+        return(carbon(self.p, pixel, se_biomass))
+
+    def get_pools(self, pixel):
+        return(pools(pixel))
+
+    def plot_all(self):
+        plt.plot_report(os.path.join(self.reports, 'model_daily.csv'),
+                        os.path.join(self.figure, 'model_cum.png'))
+        plt.plot_report(os.path.join(self.reports, 'model_annual.csv'),
+                        os.path.join(self.figure, 'model.png'), False)
+        plt.plot_report(os.path.join(self.reports, 'real_daily.csv'),
+                        os.path.join(self.figure, 'real_cum.png'))
+        plt.plot_report(os.path.join(self.reports, 'real_annual.csv'),
+                        os.path.join(self.figure, 'real.png'), False)
+        plt.plot_report(os.path.join(self.reports, 'fixed_daily.csv'),
+                        os.path.join(self.figure, 'fixed_cum.png'))
+        plt.plot_report(os.path.join(self.reports, 'fixed_annual.csv'),
+                        os.path.join(self.figure, 'fixed.png'), False)
