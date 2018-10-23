@@ -66,7 +66,7 @@ class carbon:
     seb_class = [1, 2, 3, 5]
     regrow_biomass = 0.0
     scale_factor = 0.5
-    force_start = doy_to_ordinal(2000001)
+    force_start = doy_to_ordinal(1990001)
 
     def __init__(self, para, pixel, se_biomass=-1.0):
         self.se_biomass = se_biomass * self.scale_factor
