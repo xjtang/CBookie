@@ -3,19 +3,20 @@
 import math
 
 
-def get_biomass(para, _class):
+def get_biomass(para, _class, scale_factor):
     """ get biomass value from input parameters
 
     Args:
         para (list): input parameters
         _class (str): land cover class
+        scale_factor (float): scale factor
 
     Returns:
         biomass (float): biomass value
 
     """
     para = para[0]
-    return para[para['id'] == _class][0]['biomass']
+    return para[para['id'] == _class][0]['biomass'] * scale_factor
 
 
 def get_flux(para, _class):
@@ -33,7 +34,7 @@ def get_flux(para, _class):
     return para[para['id'] == _class][0]
 
 
-def run_flux(y1, x1, x2, func, coef):
+def run_flux(y1, x1, x2, func, coef, scale_factor):
     """ calculate fluxes
 
     Args:
@@ -42,6 +43,7 @@ def run_flux(y1, x1, x2, func, coef):
         x2 (float): end time
         func (str): decay function
         coef (list, float): decay function coefs
+        scale_factor (float): scale factor
 
     Returns:
         y2 (float): biomass at x2
@@ -54,7 +56,7 @@ def run_flux(y1, x1, x2, func, coef):
     elif func == 'log':
         y2 = y1 * math.exp(-(x2 - x1) / (365.25 / coef[0]))
     elif func == 'const':
-        y2 = y1 + coef[0] * (x2 - x1) / 365.25
+        y2 = y1 + coef[0] * scale_factor * (x2 - x1) / 365.25
     elif func == 'none':
         y2 = y1
     else:

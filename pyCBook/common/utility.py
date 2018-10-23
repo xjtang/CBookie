@@ -150,7 +150,7 @@ def get_int(x):
         y (list, int): int in the string
 
     """
-    return map(int, re.findall('\d+', x))
+    return list(map(int, re.findall('\d+', x)))
 
 
 def doy_to_ordinal(doy):
@@ -187,6 +187,7 @@ def select_samples(population, n):
     Args:
         population (ndarray/list): population
         n (int): number of samples
+
     Returns:
         samples (ndarray/list): samples selected
 
@@ -197,3 +198,23 @@ def select_samples(population, n):
                                                         len(population)), n)]
     else:
         return population[random.sample(range(0, len(population)), n)]
+
+
+def get_class_string(_class, lookup):
+    """ generate a string from as list of classes
+
+    Args:
+        _class (list, int): class ids
+        lookup (ndarray): class lookup table
+
+    Returns:
+        r (string): output string
+
+    """
+    r = '['
+    for x in _class:
+        if r == '[':
+            r = r + lookup[lookup['id'] == x]['class'][0]
+        else:
+            r = '{} to {}'.format(r, lookup[lookup['id'] == x]['class'][0])
+    return r + ']'
