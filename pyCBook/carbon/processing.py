@@ -51,16 +51,19 @@ def run_flux(y1, x1, x2, func, coef, scale_factor):
     """
     if x1 == x2:
         return y1
+    y1 = y1 / scale_factor
     if func == 'linear':
         y2 = y1 * (1 - (x2 - x1) / (365.25 / coef[0]))
-    elif func == 'log':
+    elif func == 'logdc':
         y2 = y1 * math.exp(-(x2 - x1) / (365.25 / coef[0]))
     elif func == 'const':
-        y2 = y1 + coef[0] * scale_factor * (x2 - x1) / 365.25
+        y2 = y1 + coef[0] * (x2 - x1) / 365.25
+    elif func == 'log':
+        y2 = coef[0]*math.log(math.exp((y1-coef[1])/coef[0])+(x2-x1)/365.25)+coef[1]
     elif func == 'none':
         y2 = y1
     else:
         y2 = 0
     if y2 < 0:
         y2 = 0
-    return y2
+    return y2 * scale_factor
