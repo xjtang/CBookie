@@ -17,7 +17,8 @@ class test:
     wd = '/Users/xjtang/Applications/GitHub/CBookie/'
     para = os.path.join(wd, 'parameters/Colombia/')
     input = os.path.join(wd, 'pyCBook/test/data/carbon/inputs/')
-    output = os.path.join(wd, 'pyCBook/test/data/carbon/outputs/')
+    output = os.path.join(wd, 'pyCBook/test/data/carbon/outputs/carbon/')
+    report = os.path.join(wd, 'pyCBook/test/data/carbon/outputs/report/')
     figure = os.path.join(wd, 'pyCBook/test/data/carbon/plots/')
     se_biomass = -1
 
@@ -70,11 +71,11 @@ class test:
         self.plot(self.df_p, 1, os.path.join(self.figure, 'deforest_e.png'))
         self.plot(self.r_p, 0, os.path.join(self.figure, 'regrow.png'))
         self.plot(self.r_p, 1, os.path.join(self.figure, 'regrow_e.png'))
-        plt.plot_report(os.path.join(self.output, 'report_daily.csv'),
+        plt.plot_report(os.path.join(self.report, 'report_daily.csv'),
                         os.path.join(self.figure, 'report_daily.png'))
-        plt.plot_report(os.path.join(self.output, 'report_annual.csv'),
+        plt.plot_report(os.path.join(self.report, 'report_annual.csv'),
                         os.path.join(self.figure, 'report_annual_cum.png'))
-        plt.plot_report(os.path.join(self.output, 'report_annual.csv'),
+        plt.plot_report(os.path.join(self.report, 'report_annual.csv'),
                         os.path.join(self.figure, 'report_annual.png'), False)
         return 0
 
