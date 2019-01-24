@@ -37,6 +37,7 @@ def report_line(pattern, period, ori, des, lapse=1, overwrite=False,
         laspe (int): reporting interval
         overwrite (bool): overwrite or not
         recursive (bool): recursive when searching file, or not
+        batch (list, int): batch processing, [thisjob, totaljob]
 
     Returns:
         0: successful
