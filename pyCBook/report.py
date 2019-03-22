@@ -6,6 +6,7 @@
         -i (lapse): reporting interval
         -b (batch): batch process, thisjob and totaljob
         -l (line): line by line processing or not
+        -c (condense): condensing or not
         -R (recursive): recursive when seaching files
         --overwrite: overwrite or not
         ori: origin
