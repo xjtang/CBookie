@@ -5,6 +5,7 @@
 # Input Arguments:
 #		-p searching pattern
 # 	-i biomass bass image
+#		-m mask image
 #		-n number of jobs
 #		-R recursive
 #		--overwrite overwrite
@@ -15,6 +16,7 @@
 pattern=yatsm_r*.npz
 njob=1
 img=NA
+mask=NA
 overwrite=''
 recursive=''
 para=/projectnb/landsat/users/xjtang/documents/CBookie/parameters/Colombia/
@@ -29,6 +31,10 @@ while [[ $# > 0 ]]; do
 			;;
 		-i)
 			img=$2
+			shift
+			;;
+		-m)
+			mask=$2
 			shift
 			;;
 		-n)
@@ -53,5 +59,5 @@ done
 echo 'Total jobs to submit is' $njob
 for i in $(seq 1 $njob); do
     echo 'Submitting job no.' $i 'out of' $njob
-    qsub -j y -N Book_$i -V -b y cd /projectnb/landsat/users/xjtang/documents/CBookie';' python -m pyCBook.book ${overwrite}${recursive}-p $pattern -i $img -b $i $njob $ori $para $des
+    qsub -j y -N Book_$i -V -b y cd /projectnb/landsat/users/xjtang/documents/CBookie';' python -m pyCBook.book ${overwrite}${recursive}-p $pattern -i $img -m $mask -b $i $njob $ori $para $des
 done
