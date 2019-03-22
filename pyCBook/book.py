@@ -111,8 +111,7 @@ def book_carbon(pattern, ori, para, des, img='NA', mask='NA', overwrite=False,
     count = 0
     log.info('Start booking carbon...')
     for yatsm in yatsm_list:
-        if True:
-        #try:
+        try:
             records = []
             py = get_int(yatsm[1])[0]
             px = -1
@@ -147,9 +146,9 @@ def book_carbon(pattern, ori, para, des, img='NA', mask='NA', overwrite=False,
                 log.warning('Line {} all masked.'.format(py))
             np.savez(os.path.join(des,'carbon_r{}.npz'.format(py)), records)
             count += 1
-        #except:
-        #    log.warning('Failed to process line {} pixel {}.'.format(py, px))
-        #    continue
+        except:
+            log.warning('Failed to process line {} pixel {}.'.format(py, px))
+            continue
 
     # nothing is processed, all failed
     if count == 0:
