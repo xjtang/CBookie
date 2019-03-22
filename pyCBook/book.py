@@ -3,6 +3,7 @@
     Args:
         -p (pattern): searching pattern
         -i (img): biomass bass image
+        -m (mask): mask image
         -b (batch): batch process, thisjob and totaljob
         -R (recursive): recursive when seaching files
         --overwrite: overwrite or not
@@ -21,8 +22,8 @@ from .io import yatsm2pixels, csv2ndarray, image2array
 from .carbon import carbon
 
 
-def book_carbon(pattern, ori, para, des, img='NA', overwrite=False, recursive=False,
-                batch=[1,1]):
+def book_carbon(pattern, ori, para, des, img='NA', mask='NA', overwrite=False,
+                recursive=False, batch=[1,1]):
     """ carbon bookkeeping on YATSM results
 
     Args:
@@ -31,6 +32,7 @@ def book_carbon(pattern, ori, para, des, img='NA', overwrite=False, recursive=Fa
         para (str): place to look for parameters
         des (str): place to save outputs
         img (str): biomass base image
+        mask (str): mask image
         overwrite (bool): overwrite or not
         recursive (bool): recursive when searching file, or not
         batch (list, int): batch processing, [thisjob, totaljob]
@@ -85,7 +87,7 @@ def book_carbon(pattern, ori, para, des, img='NA', overwrite=False, recursive=Fa
         log.error('Failed to read parameter from {}'.format(para))
         return 4
 
-    # reading biomass base image
+    # reading input image
     if img != 'NA':
         log.info('Reading biomass base image...')
         try:
@@ -95,6 +97,15 @@ def book_carbon(pattern, ori, para, des, img='NA', overwrite=False, recursive=Fa
             return 4
     else:
         se_biomass = -1
+    if mask != 'NA':
+        log.info('Reading mask image...')
+        try:
+            mask2 = image2array(mask, 1)
+        except:
+            log.error('Failed to read mask image: {}'.format(mask))
+            return 4
+    else:
+        mask3 = 0
 
     # loop through all files
     count = 0
@@ -104,17 +115,35 @@ def book_carbon(pattern, ori, para, des, img='NA', overwrite=False, recursive=Fa
             records = []
             py = get_int(yatsm[1])[0]
             px = -1
-            log.info('Processing line {}'.format(py))
-            pixels = yatsm2pixels(os.path.join(yatsm[0], yatsm[1]))
-            if len(pixels) > 0:
-                for pixel in pixels:
-                    px = pixel[0]['px']
-                    if img != 'NA':
-                        se_biomass = biomass[py, px]
-                    carbon_pixel = carbon(p, pixel, se_biomass)
-                    records.extend(carbon_pixel.pools)
-            records = np.array(records)
-            np.savez(os.path.join(des, 'carbon_r{}.npz'.format(py)), records)
+            if mask != 'NA':
+                mask3 = min(mask2[py, :])
+                mcount = 0
+            if mask3 == 0:
+                pixels = yatsm2pixels(os.path.join(yatsm[0], yatsm[1]))
+                if len(pixels) > 0:
+                    for pixel in pixels:
+                        px = pixel[0]['px']
+                        mask3 = mask2[py, px]
+                        if mask3 == 0:
+                            if img != 'NA':
+                                se_biomass = biomass[py, px]
+                            carbon_pixel = carbon(p, pixel, se_biomass)
+                            records.extend(carbon_pixel.pools)
+                        else:
+                            mcount += 1
+                    if len(records) > 0:
+                        records = np.array(records)
+                        if mcount > 0:
+                            log.info('Line {} processed {} masked'.format(py, mcount))
+                        else:
+                            log.info('Line {} processed'.format(py))
+                    else:
+                        log.warning('Line {} no pixel {} masked.'.format(py, mcount))
+                else:
+                    log.warning('Line {} no pixel.'.format(py))
+            else:
+                log.warning('Line {} all masked.'.format(py))
+            np.savez(os.path.join(des,'carbon_r{}.npz'.format(py)), records)
             count += 1
         except:
             log.warning('Failed to process line {} pixel {}.'.format(py, px))
@@ -142,6 +171,8 @@ if __name__ == '__main__':
                         help='batch process, [thisjob, totaljob]')
     parser.add_argument('-i', '--image', action='store', type=str,
                         dest='img', default='NA', help='biomass base image')
+    parser.add_argument('-m', '--mask', action='store', type=str,
+                        dest='mask', default='NA', help='mask image')
     parser.add_argument('-R', '--recursive', action='store_true',
                         help='recursive or not')
     parser.add_argument('--overwrite', action='store_true',
@@ -166,6 +197,8 @@ if __name__ == '__main__':
     log.info('Saving in {}'.format(args.des))
     if args.img != 'NA':
         log.info('Biomass base image: {}'.format(args.img))
+    if args.mask != 'NA':
+        log.info('Mask image: {}'.format(args.mask))
     if args.recursive:
         log.info('Recursive seaching.')
     if args.overwrite:
@@ -173,4 +206,4 @@ if __name__ == '__main__':
 
     # run function to bookkeeping
     book_carbon(args.pattern, args.ori, args.para, args.des, args.img,
-                args.overwrite, args.recursive, args.batch)
+                args.mask, args.overwrite, args.recursive, args.batch)
