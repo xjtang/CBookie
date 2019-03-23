@@ -24,8 +24,8 @@ from .io import yatsm2pixels, yatsm2records
 from .carbon import pools
 
 
-def report_line(pattern, period, ori, des, lapse=1, overwrite=False,
-                    recursive=False, batch=[1,1]):
+def report_line(pattern, period, ori, des, lapse=1, recursive=False,
+                batch=[1,1]):
     """ carbon reporting from bookkeeping results
 
     Args:
@@ -34,7 +34,6 @@ def report_line(pattern, period, ori, des, lapse=1, overwrite=False,
         ori (str): place to look for inputs
         des (str): place to save outputs
         laspe (int): reporting interval
-        overwrite (bool): overwrite or not
         recursive (bool): recursive when searching file, or not
         batch (list, int): batch processing, [thisjob, totaljob]
 
@@ -130,15 +129,13 @@ def report_line(pattern, period, ori, des, lapse=1, overwrite=False,
     return 0
 
 
-def report_condense(pattern, ori, des, overwrite=False, recursive=False,
-                    batch=[1,1]):
+def report_condense(pattern, ori, des, recursive=False, batch=[1,1]):
     """ summarizing condensed reports
 
     Args:
         pattern (str): searching pattern, e.g. yatsm_r*.npz
         ori (str): place to look for inputs
         des (str): place to save outputs
-        overwrite (bool): overwrite or not
         recursive (bool): recursive when searching file, or not
         batch (list, int): batch processing, [thisjob, totaljob]
 
@@ -151,10 +148,14 @@ def report_condense(pattern, ori, des, overwrite=False, recursive=False,
         5: error writing output
 
     """
-    # check if output already exists
-    if (not overwrite) and os.path.isfile(des):
-        log.error('{} already exists.'.format(os.path.basename(des)))
-        return 1
+    # check if output exists, if not try to create one
+    if not os.path.exists(des):
+        log.warning('{} does not exist, trying to create one.'.format(des))
+        try:
+            os.makedirs(des)
+        except:
+            log.error('Cannot create output folder {}'.format(des))
+            return 1
 
     # locate files
     log.info('Locating files...')
@@ -380,10 +381,10 @@ if __name__ == '__main__':
     # run function to report carbon
     if args.line:
         report_line(args.pattern, args.period, args.ori, args.des, args.lapse,
-                    args.overwrite, args.recursive, args.batch)
+                    args.recursive, args.batch)
     elif args.condense:
-        report_condense(args.pattern, args.ori, args.des, args.overwrite,
-                            args.recursive, args.batch)
+        report_condense(args.pattern, args.ori, args.des, args.recursive,
+                        args.batch)
     else:
         report_sum(args.pattern, args.ori, args.des, args.overwrite,
                     args.recursive)
