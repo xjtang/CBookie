@@ -54,5 +54,5 @@ done
 echo 'Total jobs to submit is' $njob
 for i in $(seq 1 $njob); do
     echo 'Submitting job no.' $i 'out of' $njob
-    qsub -j y -N Map_$i -V -b y cd /projectnb/landsat/users/xjtang/documents/CBookie';' python -m pyCBook.map ${overwrite}${recursive}-p $pattern -t $time -m $map -b $ori $img $des
+    qsub -j y -N Map_$i -V -b y cd /projectnb/landsat/users/xjtang/documents/CBookie';' python -m pyCBook.map ${overwrite}${recursive}-p $pattern -t $time -m $map $ori $img $des
 done
