@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# bash script to preprocess VIIRS data
+# bash script to bookkeeping
 
 # Input Arguments:
 #		-p searching pattern

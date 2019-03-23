@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# bash script to preprocess VIIRS data
+# bash script to report carbon
 
 # Input Arguments:
 #		-p searching pattern
