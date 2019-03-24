@@ -67,6 +67,7 @@ class carbon:
     regrow_biomass = 0.0
     scale_factor = 0.5 * (30 * 30) / (100 * 100)
     force_start = doy_to_ordinal(1990001)
+    force_end = doy_to_ordinal(2020001)
 
     def __init__(self, para, pixel, se_biomass=-1.0):
         self.se_biomass = se_biomass * self.scale_factor
@@ -95,6 +96,7 @@ class carbon:
         if len(pixel) == 0:
             self.pools = []
         else:
+            pixel[-1]['end'] = self.force_end
             for i, x in enumerate(pixel):
                 if x['start'] < self.force_start:
                     x['start'] = self.force_start
