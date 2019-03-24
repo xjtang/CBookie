@@ -115,8 +115,8 @@ def book_carbon(pattern, ori, para, des, img='NA', mask='NA', overwrite=False,
             records = []
             py = get_int(yatsm[1])[0]
             px = -1
-            if (not overwrite) and os.path.isfile(os.path.join(des, 
-                                                'carbon_r{}.npz'.format(py)):
+            if (not overwrite) and os.path.isfile(os.path.join(des,
+                                                'carbon_r{}.npz'.format(py))):
                 log.warning('Line {} already exists.'.format(py))
                 continue
             if mask != 'NA':
