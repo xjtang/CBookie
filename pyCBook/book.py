@@ -100,7 +100,7 @@ def book_carbon(pattern, ori, para, des, img='NA', mask='NA', overwrite=False,
     if mask != 'NA':
         log.info('Reading mask image...')
         try:
-            mask2 = image2array(mask, 1)
+            mask2 = image2array(mask, 1) * (-1) + 1
         except:
             log.error('Failed to read mask image: {}'.format(mask))
             return 4
