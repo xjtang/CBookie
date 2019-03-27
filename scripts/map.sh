@@ -52,4 +52,4 @@ done
 
 # submit jobs
 echo 'Submitting job to map.'
-qsub -j y -N Map_$i -V -b y cd /projectnb/landsat/users/xjtang/documents/CBookie';' python -m pyCBook.map ${overwrite}${recursive}-p $pattern -t $time -m $map $ori $img $des
+qsub -j y -N Map -V -b y cd /projectnb/landsat/users/xjtang/documents/CBookie';' python -m pyCBook.map ${overwrite}${recursive}-p $pattern -t $time -m $map $ori $img $des
