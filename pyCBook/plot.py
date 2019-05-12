@@ -90,6 +90,9 @@ def plot_report(ori, des='NA',cum=True):
         3: error ploting
 
     """
+    a_area = 518131758 * 30 * 30 / 100 / 100
+    s_area = 13755 * 30 * 30 / 100 / 100
+    sf = 1000 * 1000
     # get pixel pools
     log.info('Reading input...')
     try:
@@ -106,13 +109,17 @@ def plot_report(ori, des='NA',cum=True):
                 data[i]['net'] -= data[i - 1]['net']
                 data[i]['emission'] -= data[i - 1]['emission']
                 data[i]['productivity'] -= data[i - 1]['productivity']
+            data['net'] = data['net'] / sf
+            data['emission'] = data['emission'] / sf
+            data['productivity'] = data['productivity'] / sf
+            data['date'] = data['date'] * 1000 + 1
         except:
             log.error('Failed to calculate non-cumulative results')
             return 2
-        ylabel = 'Emission (Mg C / ha. / year)'
+        ylabel = 'Emission (Tg C / year)'
         bar = True
     else:
-        ylabel = 'Cumulative Emission (Mg C / ha.)'
+        ylabel = 'Cumulative Emission (Tg C)'
         bar = False
 
     # gen plot
