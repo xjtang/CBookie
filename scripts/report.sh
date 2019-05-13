@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# bash script to preprocess VIIRS data
+# bash script to report carbon
 
 # Input Arguments:
 #		-p searching pattern
@@ -8,6 +8,7 @@
 #		-i reporting lapse
 #		-n number of jobs
 #		-l line by line processing
+#		-c condensing
 #		-R recursive
 #		--overwrite overwrite
 #		ori: origin
@@ -22,6 +23,7 @@ lapse=1
 overwrite=''
 recursive=''
 line=''
+condense=''
 
 # parse input arguments
 while [[ $# > 0 ]]; do
@@ -48,6 +50,9 @@ while [[ $# > 0 ]]; do
 		-l)
 			line='-l '
 			;;
+		-c)
+			condense='-c '
+			;;
 		-R)
 			recursive='-R '
 			;;
@@ -66,5 +71,5 @@ done
 echo 'Total jobs to submit is' $njob
 for i in $(seq 1 $njob); do
     echo 'Submitting job no.' $i 'out of' $njob
-		qsub -j y -N Report_$i -V -b y cd /projectnb/landsat/users/xjtang/documents/CBookie';' python -m pyCBook.report ${overwrite}${recursive}$line-p $pattern -i $lapse -t $t1 $t2 -b $i $njob $ori $des
+		qsub -j y -N Report_$i -V -b y cd /projectnb/landsat/users/xjtang/documents/CBookie';' python -m pyCBook.report ${overwrite}${recursive}${line}${condense}-p $pattern -i $lapse -t $t1 $t2 -b $i $njob $ori $des
 done

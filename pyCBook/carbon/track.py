@@ -32,6 +32,7 @@ class carbon:
         pid: latest pool id
         total_burned: total burned biomass
         total_above: total aboveground biomass
+        total_unreleased: total biomass unreleased
         total_biomass: total biomass in all pools
         total_emission: total emission
         total_productivity: total productivity
@@ -65,8 +66,9 @@ class carbon:
     forest = [1, 5]
     seb_class = [1, 2, 3, 5]
     regrow_biomass = 0.0
-    scale_factor = 0.5
-    force_start = doy_to_ordinal(1990001)
+    scale_factor = 0.5 * (30 * 30) / (100 * 100)
+    force_start = doy_to_ordinal(2000001)
+    force_end = doy_to_ordinal(2020001)
 
     def __init__(self, para, pixel, se_biomass=-1.0):
         self.se_biomass = se_biomass * self.scale_factor
@@ -76,6 +78,7 @@ class carbon:
         self.pid = -1
         self.total_burned = 0.0
         self.total_above = 0.0
+        self.total_unreleased = 0.0
         self.total_biomass = 0.0
         self.total_emission = 0.0
         self.total_productivity = 0.0
@@ -95,6 +98,7 @@ class carbon:
         if len(pixel) == 0:
             self.pools = []
         else:
+            pixel[-1]['end'] = self.force_end
             for i, x in enumerate(pixel):
                 if x['start'] < self.force_start:
                     x['start'] = self.force_start
@@ -116,8 +120,8 @@ class carbon:
                     if len(self.products) > 0:
                         self.update_pools()
             self.pools = np.array(self.pools)
-            (self.total_above, self.total_biomass, self.total_burned,
-                self.total_emission,
+            (self.total_above, self.total_unreleased, self.total_biomass,
+                self.total_burned, self.total_emission,
                 self.total_productivity) = self.eval(self.end)
             self.total_net = self.total_emission + self.total_productivity
 
@@ -195,9 +199,11 @@ class carbon:
     def eval(self, t):
         above = 0.0
         biomass = 0.0
+        unreleased = 0.0
         burned = 0.0
         emission = 0.0
         productivity = 0.0
+        unreleased = 0.0
         for x in self.pools:
             if t >= x['start']:
                 if t <= x['end']:
@@ -209,7 +215,7 @@ class carbon:
                     if x['pool'] == 'biomass':
                         above += biomass_t
                     elif x['pool'] == 'product':
-                        biomass += biomass_t
+                        unreleased += biomass_t
                     else:
                         emission_t = biomass_t
                         burned += emission_t
@@ -219,8 +225,8 @@ class carbon:
                     emission += emission_t
                 else:
                     productivity += emission_t
-        biomass += above
-        return (above, biomass, burned, emission, productivity)
+        biomass = above + unreleased
+        return (above, unreleased, biomass, burned, emission, productivity)
 
     def eval_pools(self, t):
         biomass = []
@@ -278,9 +284,9 @@ class pools:
                 ('id', '<u2'), ('px', '<u2'), ('py', '<u2'), ('start', '<i4'),
                 ('end', '<i4'), ('biomass', '<f4', (2, )), ('func', 'U10'),
                 ('coef', '<f4', (2, ))]
-    dtypes2 = [('date', '<i4'), ('biomass', '<f4'), ('emission', '<f4'),
-                ('productivity', '<f4'), ('net', '<f4')]
-    scale_factor = 0.5
+    dtypes2 = [('date', '<i4'), ('above', '<f4'), ('emission', '<f4'),
+                ('productivity', '<f4'), ('net', '<f4'), ('unreleased', '<f4')]
+    scale_factor = 0.5 * (30 * 30) / (100 * 100)
 
     def __init__(self, pools):
         self.pools = pools
@@ -318,10 +324,11 @@ class pools:
         return (biomass, flux)
 
     def eval_sum(self, t):
-        biomass = 0.0
+        above = 0.0
         emission = 0.0
         productivity = 0.0
         net = 0.0
+        unreleased = 0.0
         for x in self.pools:
             if t >= x['start']:
                 if t <= x['end']:
@@ -330,6 +337,8 @@ class pools:
                                             doy_to_ordinal(t), x['func'],
                                             x['coef'], self.scale_factor)
                     biomass_delta = x['biomass'][0] - biomass_t
+                    if x['pool'] == 'product':
+                        unreleased += biomass_t
                 else:
                     biomass_t = 0
                     biomass_delta = x['biomass'][0] - x['biomass'][1]
@@ -340,9 +349,9 @@ class pools:
                 if (t == x['start']) & (x['pool'] == 'burned'):
                     emission += x['biomass'][0]
                 if x['pool'] == 'biomass':
-                    biomass += biomass_t
+                    above += biomass_t
         net = emission + productivity
-        return np.array([(t, biomass, emission, productivity, net)],
+        return np.array([(t, above, emission, productivity, net, unreleased)],
                         dtype=self.dtypes2)
 
     def report(self, period, lapse=1):

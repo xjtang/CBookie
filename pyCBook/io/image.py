@@ -66,3 +66,49 @@ def image2array(img, band=0, _type=np.int16):
             array[:,:,i] = img2.GetRasterBand(x).ReadAsArray().astype(_type)
     img2 = None
     return array
+
+
+def array2image(array, geo, des, bands='NA', nodata='NA', _type=gdal.GDT_Int16,
+                driver_name='GTiff', ops=[]):
+    """ save array as an image
+
+    Args:
+        array (ndarray): array to be saved as stack image
+        geo (dic): spatial reference
+        des (str): destination to save the output stack image
+        bands (list, str): description of each band, NA for no description
+        nodata (int): nodata value
+        _type (int): gdal data type
+        driver_name (str): name of the output driver
+        ops (list, str): options for output file
+
+    Returns:
+        0: successful
+        1: error during process
+
+    """
+    try:
+        if len(array.shape) == 3:
+            (lines, samples, nband) = array.shape
+        else:
+            (lines, samples) = array.shape
+            nband = 1
+        _driver = gdal.GetDriverByName(driver_name)
+        output = _driver.Create(des, samples, lines, nband, _type, options=ops)
+        output.SetProjection(geo['proj'])
+        output.SetGeoTransform(geo['geotrans'])
+        for i in range(0, nband):
+            if nband > 1:
+                output.GetRasterBand(i+1).WriteArray(array[:,:,i])
+            else:
+                output.GetRasterBand(i+1).WriteArray(array)
+            if not nodata == 'NA':
+                output.GetRasterBand(i+1).SetNoDataValue(nodata)
+            if not bands == 'NA':
+                if type(bands) == str:
+                    output.GetRasterBand(i+1).SetDescription(bands)
+                else:
+                    output.GetRasterBand(i+1).SetDescription(bands[i])
+    except:
+        return 1
+    return 0

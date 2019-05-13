@@ -148,11 +148,11 @@ class test3:
 
     def rerun(self):
         book.book_carbon('yatsm_r*.npz', self.input, self.para, self.output,
-                            'NA', True, True)
+                            'NA', 'NA', True, True)
         rpt.report_line('carbon_r*.npz', [1990001, 2015365], self.output,
-                            self.daily, 1, True, True)
+                            self.daily, 1, True)
         rpt.report_line('carbon_r*.npz', [1990001, 2015365], self.output,
-                            self.annual, 365, True, True)
+                            self.annual, 365, True)
         rpt.report_sum('report_r1*.npz', self.daily, os.path.join(self.reports,
                         'model_daily.csv'), True, True)
         rpt.report_sum('report_r2*.npz', self.daily, os.path.join(self.reports,

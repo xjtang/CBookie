@@ -2,7 +2,7 @@
 """
 from .yatsm import yatsm2records, yatsm2pixels
 from .table import csv2list, csv2dict, csv2ndarray, list2csv
-from .image import imageGeo, image2array
+from .image import imageGeo, image2array, array2image
 
 
 __all__ = [
@@ -13,5 +13,6 @@ __all__ = [
     'csv2ndarray',
     'list2csv',
     'imageGeo',
-    'image2array'
+    'image2array',
+    'array2image'
 ]
