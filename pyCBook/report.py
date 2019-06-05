@@ -358,7 +358,7 @@ if __name__ == '__main__':
         log.info('Start carbon reporting by line...')
         log.info('Reporting period {} to {}'.format(args.period[0],
                                                     args.period[1]))
-        log.info('Reporting every {} days.'.format(args.lapse))
+        log.info('Reporting interval {}.'.format(args.lapse))
     else:
         if args.condense:
             # check arguments
