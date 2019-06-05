@@ -421,7 +421,7 @@ class aggregated:
                 ('func', 'U10'), ('coef', '<f4', (2, ))]
     pname = ['biomass', 'product', 'burned']
     spname = ['above', 'durable', 'fuel', 'pulp', 'burned']
-    transitions = ['sec_forest', 'for_past', 'for_sec']
+    transitions = ['sec_forest', 'for_oth', 'sec_oth']
     forest = [1, 5]
     scale_factor = 0.5 / (100 * 100)
 
