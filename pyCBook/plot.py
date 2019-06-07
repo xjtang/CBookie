@@ -112,7 +112,6 @@ def plot_report(ori, des='NA',cum=True):
             data['net'] = data['net'] / sf
             data['emission'] = data['emission'] / sf
             data['productivity'] = data['productivity'] / sf
-            data['date'] = data['date'] * 1000 + 1
         except:
             log.error('Failed to calculate non-cumulative results')
             return 2

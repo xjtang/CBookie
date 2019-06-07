@@ -288,7 +288,7 @@ def report_sum(pattern, ori, des, overwrite=False, recursive=False):
                     r['emission'] += records['emission']
                     r['productivity'] += records['productivity']
                     r['net'] += records['net']
-                    r['unreleased'] += record['unreleased']
+                    r['unreleased'] += records['unreleased']
                 log.info('Processed file {}'.format(py))
                 pcount += get_int(report[1])[-1]
             else:
