@@ -72,11 +72,11 @@ class carbon:
     forest = [1, 5]
     seb_class = [1, 2, 3, 5]
     regrow_biomass = 0.0
-    scale_factor = 0.5 / (100 * 100)
+    scale_factor = 0.5
     force_start = doy_to_ordinal(2000001)
     force_end = doy_to_ordinal(2020001)
 
-    def __init__(self, para, pixel, se_biomass=-1.0, psize=(30*30)):
+    def __init__(self, para, pixel, se_biomass=-1.0, psize=(0.3*0.3)):
         self.pixel_size = psize
         self.scale_factor2 = self.scale_factor * self.pixel_size
         self.se_biomass = se_biomass * self.scale_factor2
@@ -301,7 +301,7 @@ class pools:
                 ('func', 'U10'), ('coef', '<f4', (2, ))]
     dtypes2 = [('date', '<i4'), ('above', '<f4'), ('emission', '<f4'),
                 ('productivity', '<f4'), ('net', '<f4'), ('unreleased', '<f4')]
-    scale_factor = 0.5 / (100 * 100)
+    scale_factor = 0.5
 
     def __init__(self, pools):
         self.pools = pools
@@ -421,9 +421,9 @@ class aggregated:
                 ('func', 'U10'), ('coef', '<f4', (2, ))]
     pname = ['biomass', 'product', 'burned']
     spname = ['above', 'durable', 'fuel', 'pulp', 'burned']
-    transitions = ['sec_forest', 'for_oth', 'sec_oth']
+    transitions = ['sec', 'for_pas', 'for_sec', 'sec_gain', 'sec_pas']
     forest = [1, 5]
-    scale_factor = 0.5 / (100 * 100)
+    scale_factor = 0.5
 
     def __init__(self, para, data):
         self.pid = -1
@@ -437,33 +437,43 @@ class aggregated:
         for x in data:
             start = x['start'] * 1000 + 1
             end = x['end'] * 1000 + 1
-            self.deforest(start, self.end, x[self.transitions[1]], self.forest[0])
-            self.deforest(start, self.end, x[self.transitions[2]], self.forest[1])
-            self.regrow(start, end, x[self.transitions[0]])
+            middle = ordinal_to_doy(int((doy_to_ordinal(start)+doy_to_ordinal(end))/2))
+            self.regrow(start, end, x[self.transitions[0]], False)
+            self.deforest(middle, self.end, x[self.transitions[1]], self.forest[0])
+            self.deforest(middle, self.end, x[self.transitions[2]], self.forest[0])
+            self.regrow(start, end, x[self.transitions[3]], True)
+            self.deforest(middle, self.end, x[self.transitions[4]], self.forest[1])
         self.update_pools()
         self.pools = np.array(self.pools)
 
-    def regrow(self, start, end, area):
-        self.pid += 1
-        biomass = get_biomass(self.p, self.forest[1], self.scale_factor * area)
-        flux = get_flux(self.p, self.forest[1])
-        self.pools.extend(np.array([(self.pname[0], self.spname[0],
-                            self.forest[1], self.pid, 0, 0, area, start, end,
-                            [biomass, 0.0], flux['function'], (flux['coef1'],
-                            flux['coef2']))], dtype=self.dtypes))
+    def regrow(self, start, end, area, new=False):
+        if area > 0:
+            self.pid += 1
+            if new:
+                biomass = 0
+            else:
+                biomass = get_biomass(self.p, self.forest[1],
+                                        self.scale_factor * area)
+            flux = get_flux(self.p, self.forest[1])
+            self.pools.extend(np.array([(self.pname[0], self.spname[0],
+                                self.forest[1], self.pid, 0, 0, area, start,
+                                end, [biomass, 0.0], flux['function'],
+                                (flux['coef1'], flux['coef2']))],
+                                dtype=self.dtypes))
 
     def deforest(self, start, end, area, ftype=0):
-        biomass = get_biomass(self.p, ftype, self.scale_factor * area)
-        for x in self.p[2]:
-            if x['fraction'] > 0:
-                self.pid += 1
-                self.pools.extend(np.array([(self.pname[1], x['product'], 99,
-                                    self.pid, 0, 0, area, start, end,
-                                    [biomass * x['fraction'], 0.0],
-                                    x['function'], [x['coef1'], x['coef2']])],
-                                    dtype=self.dtypes))
-                if x['product'] == 'burned':
-                    self.pools[-1]['pool'] = self.pname[2]
+        if area > 0:
+            biomass = get_biomass(self.p, ftype, self.scale_factor * area)
+            for x in self.p[2]:
+                if x['fraction'] > 0:
+                    self.pid += 1
+                    self.pools.extend(np.array([(self.pname[1], x['product'],
+                                        99, self.pid, 0, 0, area, start, end,
+                                        [biomass * x['fraction'], 0.0],
+                                        x['function'], [x['coef1'],
+                                        x['coef2']])], dtype=self.dtypes))
+                    if x['product'] == 'burned':
+                        self.pools[-1]['pool'] = self.pname[2]
 
     def emission(self, pid):
         pool = self.pools[pid]
