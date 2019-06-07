@@ -1,5 +1,5 @@
 'id','product','fraction','function','coef1','coef2'
-1,'durable',0,'linear',0.1,0
-3,'slash',0,'logdc',0.1,0
-4,'elementary','0','linear',0.001,0
-5,'burned',1,'released',0,0
+1,'durable',0,'linear',0.1,0.0
+3,'slash',0,'logdc',0.1,0.0
+4,'elementary','0','linear',0.001,0.0
+5,'burned',1,'released',0.0,0.0
