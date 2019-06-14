@@ -71,6 +71,7 @@ class carbon:
     spname = ['above', 'durable', 'fuel', 'pulp', 'burned']
     forest = [1, 5]
     seb_class = [1, 2, 3, 5]
+    unclassified = 0
     regrow_biomass = 0.0
     scale_factor = 0.5
     force_start = doy_to_ordinal(2000001)
@@ -103,10 +104,19 @@ class carbon:
 
     def assess_pixel(self, pixel):
         pixel = pixel[pixel['end'] >= self.force_start]
+        pixel = pixel[pixel['start'] <= self.force_end]
         if len(pixel) == 0:
             self.pools = []
         else:
-            pixel[-1]['end'] = self.force_end
+            if (pixel[-1]['break'] == 0) | (pixel[-1]['break'] >= self.force_end):
+                pixel[-1]['end'] = self.force_end
+                pixel[-1]['break'] = 0
+            else:
+                pixel = np.append(pixel, pixel[-1])
+                pixel[-1]['start'] = pixel[-2]['break']
+                pixel[-1]['end'] = self.force_end
+                pixel[-1]['break'] = 0
+                pixel[-1]['class'] = self.unclassified
             for i, x in enumerate(pixel):
                 if x['start'] < self.force_start:
                     x['start'] = self.force_start
@@ -135,7 +145,9 @@ class carbon:
 
     def assess_ts(self, ts):
         if len(self.lc) > 0:
-            if ts['class'] == self.lc[-1]:
+            if ((ts['class'] == self.lc[-1]) |
+                ((self.lc[-1] == self.forest[1]) &
+                (ts['class'] == self.forest[0]))):
                 self.pools[self.pmain]['end'] = ordinal_to_doy(ts['end'])
                 self.emission(self.pmain)
             else:
