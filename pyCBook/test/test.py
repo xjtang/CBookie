@@ -30,18 +30,31 @@ class test:
         self.p = [csv2ndarray(os.path.join(self.para, 'biomass.csv')),
                     csv2ndarray(os.path.join(self.para, 'flux.csv')),
                     csv2ndarray(os.path.join(self.para, 'product.csv'))]
-        self.f = yatsm2records(os.path.join(self.input, 'yatsm_r1.npz'))
-        self.df = yatsm2records(os.path.join(self.input, 'yatsm_r2.npz'))
-        self.r = yatsm2records(os.path.join(self.input, 'yatsm_r3.npz'))
-        self.df2 = yatsm2records(os.path.join(self.input, 'yatsm_r4.npz'))
+
+        self.f = yatsm2records(os.path.join(self.input, 'yatsm_r1_f.npz'))
+        self.df = yatsm2records(os.path.join(self.input, 'yatsm_r2_df.npz'))
+        self.r = yatsm2records(os.path.join(self.input, 'yatsm_r3_r.npz'))
+        self.df2 = yatsm2records(os.path.join(self.input, 'yatsm_r4_df2.npz'))
+        self.fu = yatsm2records(os.path.join(self.input, 'yatsm_r5_fu.npz'))
+        self.rr = yatsm2records(os.path.join(self.input, 'yatsm_r6_rr.npz'))
+        self.fdr = yatsm2records(os.path.join(self.input, 'yatsm_r7_fdr.npz'))
+
         self.f_c = self.get_carbon(self.f, self.se_biomass, self.pixel_size)
         self.df_c = self.get_carbon(self.df, self.se_biomass, self.pixel_size)
-        self.df2_c = self.get_carbon(self.df2, self.se_biomass, self.pixel_size)
         self.r_c = self.get_carbon(self.r, self.se_biomass, self.pixel_size)
+        self.df2_c = self.get_carbon(self.df2, self.se_biomass, self.pixel_size)
+        self.fu_c = self.get_carbon(self.fu, self.se_biomass, self.pixel_size)
+        self.rr_c = self.get_carbon(self.rr, self.se_biomass, self.pixel_size)
+        self.fdr_c = self.get_carbon(self.fdr, self.se_biomass, self.pixel_size)
+
         self.f_p = self.get_pools(self.f_c.pools)
         self.df_p = self.get_pools(self.df_c.pools)
-        self.df2_p = self.get_pools(self.df2_c.pools)
         self.r_p = self.get_pools(self.r_c.pools)
+        self.df2_p = self.get_pools(self.df2_c.pools)
+        self.fu_p = self.get_pools(self.fu_c.pools)
+        self.rr_p = self.get_pools(self.rr_c.pools)
+        self.fdr_p = self.get_pools(self.fdr_c.pools)
+
         self.a = csv2ndarray(os.path.join(self.area, 'input.csv'))
         self.a_p = self.get_aggregated(self.a)
 
@@ -50,6 +63,9 @@ class test:
         self.df_2 = yatsm2records(os.path.join(self.output, 'carbon_r2.npz'))
         self.r_2 = yatsm2records(os.path.join(self.output, 'carbon_r3.npz'))
         self.df2_2 = yatsm2records(os.path.join(self.output, 'carbon_r4.npz'))
+        self.fu_2 = yatsm2records(os.path.join(self.output, 'carbon_r5.npz'))
+        self.rr_2 = yatsm2records(os.path.join(self.output, 'carbon_r6.npz'))
+        self.fdr_2 = yatsm2records(os.path.join(self.output, 'carbon_r7.npz'))
 
     def get_carbon(self, pixel, se_biomass=-1, psize=900):
         return(carbon(self.p, pixel, se_biomass, psize))
@@ -93,10 +109,16 @@ class test:
         self.plot(self.f_p, 1, os.path.join(self.figure, 'forest_e.png'))
         self.plot(self.df_p, 0, os.path.join(self.figure, 'deforest.png'))
         self.plot(self.df_p, 1, os.path.join(self.figure, 'deforest_e.png'))
-        self.plot(self.df2_p, 0, os.path.join(self.figure, 'deforest2.png'))
-        self.plot(self.df2_p, 1, os.path.join(self.figure, 'deforest2_e.png'))
         self.plot(self.r_p, 0, os.path.join(self.figure, 'regrow.png'))
         self.plot(self.r_p, 1, os.path.join(self.figure, 'regrow_e.png'))
+        self.plot(self.df2_p, 0, os.path.join(self.figure, 'deforest2.png'))
+        self.plot(self.df2_p, 1, os.path.join(self.figure, 'deforest2_e.png'))
+        self.plot(self.fu_p, 0, os.path.join(self.figure, 'deforest3.png'))
+        self.plot(self.fu_p, 1, os.path.join(self.figure, 'deforest3_e.png'))
+        self.plot(self.rr_p, 0, os.path.join(self.figure, 'regrow2.png'))
+        self.plot(self.rr_p, 1, os.path.join(self.figure, 'regrow2_e.png'))
+        self.plot(self.fdr_p, 0, os.path.join(self.figure, 'three.png'))
+        self.plot(self.fdr_p, 1, os.path.join(self.figure, 'three_e.png'))
         plt.plot_report(os.path.join(self.report, 'daily.csv'),
                         os.path.join(self.figure, 'r_daily_cum.png'))
         plt.plot_report(os.path.join(self.report, 'annual.csv'),
@@ -121,72 +143,3 @@ class test:
         record = pixel.record()[_which]
         plot_pools(record, title, ylabel, des)
         return 0
-
-
-class test2:
-    """ testing
-    """
-    wd = '/Users/xjtang/Applications/GitHub/CBookie/'
-    para = os.path.join(wd, 'parameters/Colombia/')
-    input = os.path.join(wd, 'pyCBook/test/data/uncertainty/inputs/')
-    output = os.path.join(wd, 'pyCBook/test/data/uncertainty/outputs/')
-    reports = os.path.join(wd, 'pyCBook/test/data/uncertainty/reports/')
-    daily = os.path.join(wd, 'pyCBook/test/data/uncertainty/reports/daily')
-    annual = os.path.join(wd, 'pyCBook/test/data/uncertainty/reports/annual')
-    figure = os.path.join(wd, 'pyCBook/test/data/uncertainty/plots/')
-    se_biomass = -1
-
-    def __init__(self):
-        self.p = [csv2ndarray(os.path.join(self.para, 'biomass.csv')),
-                    csv2ndarray(os.path.join(self.para, 'flux.csv')),
-                    csv2ndarray(os.path.join(self.para, 'product.csv'))]
-        self.model = yatsm2records(os.path.join(self.input, 'yatsm_r1.npz'))
-        self.real = yatsm2records(os.path.join(self.input, 'yatsm_r2.npz'))
-        self.fixed = yatsm2records(os.path.join(self.input, 'yatsm_r3.npz'))
-        self.model_c = self.get_carbon(self.model, self.se_biomass)
-        self.real_c = self.get_carbon(self.real, self.se_biomass)
-        self.fixed_c = self.get_carbon(self.fixed, self.se_biomass)
-        self.model_p = self.get_pools(self.model_c.pools)
-        self.real_p = self.get_pools(self.real_c.pools)
-        self.fixed_p = self.get_pools(self.fixed_c.pools)
-
-    def rerun(self):
-        book.book_carbon('yatsm_r*.npz', self.input, self.para, self.output,
-                            'NA', 'NA', True, True)
-        rpt.report_line('carbon_r*.npz', [1990001, 2015365], self.output,
-                            self.daily, 1, True)
-        rpt.report_line('carbon_r*.npz', [1990001, 2015365], self.output,
-                            self.annual, 365, True)
-        rpt.report_sum('report_r1*.npz', self.daily, os.path.join(self.reports,
-                        'model_daily.csv'), True, True)
-        rpt.report_sum('report_r2*.npz', self.daily, os.path.join(self.reports,
-                        'real_daily.csv'), True, True)
-        rpt.report_sum('report_r3*.npz', self.daily, os.path.join(self.reports,
-                        'fixed_daily.csv'), True, True)
-        rpt.report_sum('report_r1*.npz', self.annual, os.path.join(self.reports,
-                        'model_annual.csv'), True, True)
-        rpt.report_sum('report_r2*.npz', self.annual, os.path.join(self.reports,
-                        'real_annual.csv'), True, True)
-        rpt.report_sum('report_r3*.npz', self.annual, os.path.join(self.reports,
-                        'fixed_annual.csv'), True, True)
-        return 0
-
-    def get_carbon(self, pixel, se_biomass):
-        return(carbon(self.p, pixel, se_biomass))
-
-    def get_pools(self, pixel):
-        return(pools(pixel))
-
-    def plot_all(self):
-        plt.plot_report(os.path.join(self.reports, 'model_daily.csv'),
-                        os.path.join(self.figure, 'model_cum.png'))
-        plt.plot_report(os.path.join(self.reports, 'model_annual.csv'),
-                        os.path.join(self.figure, 'model.png'), False)
-        plt.plot_report(os.path.join(self.reports, 'real_daily.csv'),
-                        os.path.join(self.figure, 'real_cum.png'))
-        plt.plot_report(os.path.join(self.reports, 'real_annual.csv'),
-                        os.path.join(self.figure, 'real.png'), False)
-        plt.plot_report(os.path.join(self.reports, 'fixed_daily.csv'),
-                        os.path.join(self.figure, 'fixed_cum.png'))
-        plt.plot_report(os.path.join(self.reports, 'fixed_annual.csv'),
-                        os.path.join(self.figure, 'fixed.png'), False)
