@@ -73,7 +73,7 @@ class carbon:
     seb_class = [1, 2, 3, 5]
     unclassified = 0
     regrow_biomass = 0.0
-    scale_factor = 0.5
+    scale_factor = 0.47
     force_start = doy_to_ordinal(2000001)
     force_end = doy_to_ordinal(2020001)
 
@@ -151,6 +151,8 @@ class carbon:
                 self.pools[self.pmain]['end'] = ordinal_to_doy(ts['end'])
                 self.emission(self.pmain)
             else:
+                if (self.lc[-1] not in self.forest) & (ts['class'] == self.forest[0]):
+                    ts['class'] = self.forest[1]
                 if self.lc[-1] in self.forest:
                     self.deforest()
                 else:
@@ -313,7 +315,7 @@ class pools:
                 ('func', 'U10'), ('coef', '<f4', (2, ))]
     dtypes2 = [('date', '<i4'), ('above', '<f4'), ('emission', '<f4'),
                 ('productivity', '<f4'), ('net', '<f4'), ('unreleased', '<f4')]
-    scale_factor = 0.5
+    scale_factor = 0.47
 
     def __init__(self, pools):
         self.pools = pools
@@ -435,7 +437,7 @@ class aggregated:
     spname = ['above', 'durable', 'fuel', 'pulp', 'burned']
     transitions = ['sec', 'for_pas', 'for_sec', 'sec_gain', 'sec_pas']
     forest = [1, 5]
-    scale_factor = 0.5
+    scale_factor = 0.47
 
     def __init__(self, para, data):
         self.pid = -1
