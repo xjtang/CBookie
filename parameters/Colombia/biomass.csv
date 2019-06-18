@@ -1,9 +1,9 @@
 'id','class','biomass'
-1,'forest',273.14
+1,'forest',273.14838
 2,'grassland',10.0
 3,'urban',0.0
 4,'pasture/cropland',5.0
-5,'regrowth/secondary',136.57
+5,'regrowth/secondary',136.57419
 6,'water',0.0
 7,'sand',0.0
 0,'unclassified',0.0
