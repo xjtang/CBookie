@@ -17,6 +17,7 @@ import numpy as np
 from .common import log, ordinal_to_doy, doy_to_ordinal
 from .io import csv2ndarray
 from .carbon import aggregated, pools
+from .common import constants as cons
 
 
 def area_carbon(ori, para, des, period=[2001, 2015], lapse=1, overwrite=False):
@@ -64,17 +65,14 @@ def area_carbon(ori, para, des, period=[2001, 2015], lapse=1, overwrite=False):
     # initialize output data
     log.info('Initializing output...')
     try:
-        dtypes = [('date', '<i4'), ('above', '<f4'), ('emission', '<f4'),
-                    ('productivity', '<f4'), ('net', '<f4'),
-                    ('unreleased', '<f4')]
-        if max(period) < 3000:
+        if max(period) < cons.MAX_YEAR:
             period2 = [doy_to_ordinal(x * 1000 + 1) for x in range(period[0],
                         period[1] + 1, lapse)]
         else:
             period2 = range(doy_to_ordinal(period[0]),
                             doy_to_ordinal(period[1]) + 1, lapse)
-        r = np.array([(ordinal_to_doy(x), 0, 0, 0, 0, 0) for x in period2],
-                        dtype=dtypes)
+        r = np.array([(ordinal_to_doy(x), 0.0, 0.0, 0.0, 0.0,
+                        0.0) for x in period2], dtype=cons.DTYPES2)
     except:
         log.error('Failed to initialize output')
         return 3
@@ -85,7 +83,6 @@ def area_carbon(ori, para, des, period=[2001, 2015], lapse=1, overwrite=False):
         r1 = aggregated(p, actvt)
         r2 = pools(r1.pools)
         r3 = r2.report(period, lapse)
-        r['above'] = r3['above']
         r['emission'] = r3['emission']
         r['productivity'] = r3['productivity']
         r['net'] = r3['net']
@@ -97,8 +94,7 @@ def area_carbon(ori, para, des, period=[2001, 2015], lapse=1, overwrite=False):
     # writing output
     log.info('Writing output...')
     try:
-        np.savetxt(des, r, delimiter=',', fmt='%d,%f,%f,%f,%f,%f',
-                    header='date,above,emission,productivity,net,unreleased',
+        np.savetxt(des, r, delimiter=',', fmt=cons.FMT, header=cons.HEADER,
                     comments='')
     except:
         log.error('Failed to save results to {}'.format(des))

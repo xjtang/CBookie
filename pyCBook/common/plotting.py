@@ -7,6 +7,8 @@ import re
 import numpy as np
 import matplotlib.pyplot as plot
 
+from . import constants as cons
+
 
 def plot_pools(records, title='Carbon Pools',
                 ylabel='Carbon Density (Mg C / ha.)', des='NA'):
@@ -30,9 +32,9 @@ def plot_pools(records, title='Carbon Pools',
     for i in range(1, len(pnames)):
         # calculate x and y
         pname = pnames[i]
-        y = data[data[:, i] > -9999, i]
-        x = data[data[:, i] > -9999, 0]
-        x = x // 1000 + (x - (x // 1000 * 1000)) / 365.25
+        y = data[data[:, i] > cons.MAP_NODATA, i]
+        x = data[data[:, i] > cons.MAP_NODATA, 0]
+        x = x // 1000 + (x - (x // 1000 * 1000)) / cons.DIY
         # figure our color
         if 'above' in pname:
             _format = 'b-'
@@ -76,7 +78,7 @@ def plot_book(book, bar=False, title='Cumulative Emission',
 
     """
     # calculate x
-    x = book['date']//1000 + (book['date'] - (book['date']//1000*1000)) / 365.25
+    x = book['date']//1000 + (book['date'] - (book['date']//1000*1000)) / cons.DIY
     # make plot
     if bar:
         plot.bar(x, book['emission'], color='red')

@@ -7,6 +7,7 @@ from .common import (log, get_files, get_int, plot_pools, get_class_string,
                         plot_book)
 from .io import yatsm2records, csv2ndarray
 from .carbon import pools
+from .common import constants as cons
 
 
 def plot_pixel(ori, lookup, px, py, _which=0, des='NA'):
@@ -90,9 +91,9 @@ def plot_report(ori, des='NA',cum=True):
         3: error ploting
 
     """
-    a_area = 518131758 * 30 * 30 / 100 / 100
-    s_area = 13755 * 30 * 30 / 100 / 100
-    sf = 1000 * 1000
+    a_area = cons.AREA
+    s_area = cons.SAREA
+    sf = cons.SCALE_FACTOR2
     # get pixel pools
     log.info('Reading input...')
     try:

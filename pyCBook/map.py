@@ -20,6 +20,7 @@ from osgeo import gdal
 from .common import log, get_files, get_int, doy_to_ordinal, ordinal_to_doy
 from .io import yatsm2pixels, yatsm2records, imageGeo, image2array, array2image
 from .carbon import pools
+from .common import constants as cons
 
 
 def map_carbon(pattern, _time, map, img, ori, des, overwrite=False,
@@ -77,7 +78,7 @@ def map_carbon(pattern, _time, map, img, ori, des, overwrite=False,
     # initialize output
     log.info('Initializing output...')
     try:
-        r = np.zeros((geo['lines'], geo['samples']), np.int32) - 9999
+        r = np.zeros((geo['lines'], geo['samples']), np.int32) + cons.MAP_NODATA
         count = 0
     except:
         log.error('Failed to initialize output.')
@@ -95,7 +96,7 @@ def map_carbon(pattern, _time, map, img, ori, des, overwrite=False,
                     px = pixel[0]['px']
                     pixel_pools = pools(pixel)
                     record = pixel_pools.eval_sum(_time)
-                    r[py, px] = record[map] / (0.5 * (30 * 30) / (100 * 100))
+                    r[py, px] = record[map] / (cons.SCALE_FACTOR * pixel_pools[0]['psize']
                     #r['biomass'] += record['biomass']
                     #r['emission'] += record['emission']
                     #r['productivity'] += record['productivity']
@@ -114,7 +115,7 @@ def map_carbon(pattern, _time, map, img, ori, des, overwrite=False,
 
     # write output
     log.info('Writing output...')
-    if array2image(r, geo, des, map, -9999, gdal.GDT_Int32, 'GTiff',
+    if array2image(r, geo, des, map, cons.MAP_NODATA, gdal.GDT_Int32, 'GTiff',
                     ['COMPRESS=PACKBITS']) > 0:
         log.error('Failed to write output to {}'.format(des))
         return 6
