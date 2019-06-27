@@ -13,6 +13,7 @@ FOREST = [1, 5]
 SEB_CLASS = [1, 5]
 UNCLASSIFIED = 0
 REGROW_BIOMASS = 0.0
+FOREST_MIN = 35.0
 FORCE_START = 2000001
 FORCE_END = 2020001
 TRANSITIONS = ['sec', 'for_pas', 'for_sec', 'sec_gain', 'sec_pas']

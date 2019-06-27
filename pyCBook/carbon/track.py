@@ -25,6 +25,7 @@ class carbon:
         seb_class (list, int): classes that uses the se_biomass
         unclassified (int): unclassified class
         regrow_biomass (float): biomass of new regrow forest
+        forest_min (float): minimum biomass for forest
         scale_factor (float): scale factor for biomass
         force_start (int): force bookkeeping to start after this date
         force_end (int): force bookkeeping to end on this date
@@ -56,7 +57,7 @@ class carbon:
     forest = cons.FOREST
     seb_class = cons.SEB_CLASS
     unclassified = cons.UNCLASSIFIED
-    regrow_biomass = cons.REGROW_BIOMASS
+
     scale_factor = cons.SCALE_FACTOR
     force_start = doy_to_ordinal(cons.FORCE_START)
     force_end = doy_to_ordinal(cons.FORCE_END)
@@ -74,6 +75,8 @@ class carbon:
         self.p = para
         self.px = pixel[0]['px']
         self.py = pixel[0]['py']
+        regrow_biomass = cons.REGROW_BIOMASS * self.scale_factor2
+        forest_min = cons.FOREST_MIN * self.scale_factor2
         self.assess_pixel(pixel)
 
     def assess_pixel(self, pixel):
@@ -128,9 +131,11 @@ class carbon:
         self.lc.append(ts['class'])
         if (self.pid == 0) & (ts['class'] in self.seb_class) & (self.se_biomass >= 0):
             biomass = self.se_biomass
+            if (ts['class'] == self.forest[0]) & (biomass < self.forest_min):
+                biomass = get_biomass(self.p, ts['class'], self.scale_factor2)
         else:
             if ts['class'] == self.forest[1]:
-                biomass = self.regrow_biomass * self.scale_factor2
+                biomass = self.regrow_biomass
             else:
                 biomass = get_biomass(self.p, ts['class'], self.scale_factor2)
         flux = get_flux(self.p, ts['class'])
