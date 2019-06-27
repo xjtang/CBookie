@@ -22,6 +22,7 @@ from .common import (log, get_files, get_int, doy_to_ordinal, ordinal_to_doy,
                         manage_batch)
 from .io import yatsm2pixels, yatsm2records
 from .carbon import pools
+from .common import constants as cons
 
 
 def report_line(pattern, period, ori, des, lapse=1, recursive=False,
@@ -77,9 +78,7 @@ def report_line(pattern, period, ori, des, lapse=1, recursive=False,
         log.info('{} files to be processed by this job.'.format(n))
 
     # initialize output
-    dtypes = [('date', '<i4'), ('above', '<f4'), ('emission', '<f4'),
-                ('productivity', '<f4'), ('net', '<f4'), ('unreleased', '<f4')]
-    if max(period) < 3000:
+    if max(period) < cons.MAX_YEAR:
         period2 = [doy_to_ordinal(x * 1000 + 1) for x in range(period[0],
                     period[1] + 1)]
     else:
@@ -97,13 +96,12 @@ def report_line(pattern, period, ori, des, lapse=1, recursive=False,
             pcount = 0
             r = []
             if len(pixels) > 0:
-                r = np.array([(ordinal_to_doy(x), 0, 0, 0, 0, 0) for x in period2],
-                                dtype=dtypes)
+                r = np.array([(ordinal_to_doy(x), 0.0, 0.0, 0.0, 0.0,
+                                0.0) for x in period2], dtype=cons.DTYPES2)
                 for pixel in pixels:
                     px = pixel[0]['px']
                     pixel_pools = pools(pixel)
                     record = pixel_pools.report(period, lapse)
-                    r['above'] += record['above']
                     r['emission'] += record['emission']
                     r['productivity'] += record['productivity']
                     r['net'] += record['net']
@@ -194,7 +192,6 @@ def report_condense(pattern, ori, des, recursive=False, batch=[1,1]):
                 if lcount == 0:
                     r = records
                 else:
-                    r['above'] += records['above']
                     r['emission'] += records['emission']
                     r['productivity'] += records['productivity']
                     r['net'] += records['net']
@@ -284,7 +281,6 @@ def report_sum(pattern, ori, des, overwrite=False, recursive=False):
                 if pcount == 0:
                     r = records
                 else:
-                    r['above'] += records['above']
                     r['emission'] += records['emission']
                     r['productivity'] += records['productivity']
                     r['net'] += records['net']
@@ -307,8 +303,7 @@ def report_sum(pattern, ori, des, overwrite=False, recursive=False):
     # write output
     log.info('Writing output...')
     try:
-        np.savetxt(des, r, delimiter=',', fmt='%d,%f,%f,%f,%f,%f',
-                    header='date,above,emission,productivity,net,unreleased',
+        np.savetxt(des, r, delimiter=',', fmt=cons.FMT, header=cons.HEADER,
                     comments='')
     except:
         log.error('Failed to write output to {}'.format(des))
