@@ -75,8 +75,8 @@ class carbon:
         self.p = para
         self.px = pixel[0]['px']
         self.py = pixel[0]['py']
-        regrow_biomass = cons.REGROW_BIOMASS * self.scale_factor2
-        forest_min = cons.FOREST_MIN * self.scale_factor2
+        self.regrow_biomass = cons.REGROW_BIOMASS * self.scale_factor2
+        self.forest_min = cons.FOREST_MIN * self.scale_factor2
         self.assess_pixel(pixel)
 
     def assess_pixel(self, pixel):
