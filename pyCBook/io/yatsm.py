@@ -47,6 +47,6 @@ def yatsm2pixels(_file, x=[], verbose=False):
     if len(records) > 0:
         pxs = np.unique(records['px'])
         for px in pxs:
-            if (px in x) or (len(x)==0):
-                pixels.append(records[records['px']==px])
+            if (px in x) or (len(x) == 0):
+                pixels.append(records[records['px'] == px])
     return pixels

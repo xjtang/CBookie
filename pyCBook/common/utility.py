@@ -12,7 +12,7 @@ from calendar import isleap
 from datetime import date
 
 
-def date_to_doy(year,month,day,day_only=False):
+def date_to_doy(year, month, day, day_only=False):
     """ convert date to day-of-year
 
     Args:
@@ -29,7 +29,7 @@ def date_to_doy(year,month,day,day_only=False):
     doy = 0
 
     # leap yaer
-    day_in_month = [0,31,28,31,30,31,30,31,31,30,31,30]
+    day_in_month = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30]
     if isleap(year):
         day_in_month[2] = 29
 
@@ -56,14 +56,14 @@ def doy_to_date(doy):
     year, month, day = 0, 0, 0
 
     # leap year
-    year = doy//1000
-    day_in_month = [31,28,31,30,31,30,31,31,30,31,30,31]
+    year = doy // 1000
+    day_in_month = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
     if isleap(year):
         day_in_month[1] = 29
 
     # calculate date
     doy = doy - year * 1000
-    for i in range(0,12):
+    for i in range(0, 12):
         doy = doy - day_in_month[i]
         if doy <= 0:
             month = i + 1
@@ -86,7 +86,7 @@ def get_files(path, pattern, recursive=True):
     """
     if recursive:
         return [[x[0], x[1]] for x in [[pn, f] for pn, dn, fn in os.walk(path)
-                for f in fn] if fnmatch.fnmatch(x[1],pattern)]
+                for f in fn] if fnmatch.fnmatch(x[1], pattern)]
     else:
         return [[path, f] for f in fnmatch.filter(os.listdir(path), pattern)]
 

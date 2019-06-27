@@ -55,7 +55,7 @@ def image2array(img, band=0, _type=np.int16):
                 array = np.zeros((img2.RasterYSize, img2.RasterXSize,
                                     nband)).astype(_type)
                 for i in range(0, nband):
-                    array[:,:,i] = img2.GetRasterBand(i +
+                    array[:, :, i] = img2.GetRasterBand(i +
                                     1).ReadAsArray().astype(_type)
         else:
             array = img2.GetRasterBand(band).ReadAsArray().astype(_type)
@@ -63,7 +63,7 @@ def image2array(img, band=0, _type=np.int16):
         array = np.zeros((img2.RasterYSize, img2.RasterXSize,
                             len(band))).astype(_type)
         for i, x in enumerate(band):
-            array[:,:,i] = img2.GetRasterBand(x).ReadAsArray().astype(_type)
+            array[:, :, i] = img2.GetRasterBand(x).ReadAsArray().astype(_type)
     img2 = None
     return array
 
@@ -99,16 +99,16 @@ def array2image(array, geo, des, bands='NA', nodata='NA', _type=gdal.GDT_Int16,
         output.SetGeoTransform(geo['geotrans'])
         for i in range(0, nband):
             if nband > 1:
-                output.GetRasterBand(i+1).WriteArray(array[:,:,i])
+                output.GetRasterBand(i + 1).WriteArray(array[:, :, i])
             else:
-                output.GetRasterBand(i+1).WriteArray(array)
+                output.GetRasterBand(i + 1).WriteArray(array)
             if not nodata == 'NA':
-                output.GetRasterBand(i+1).SetNoDataValue(nodata)
+                output.GetRasterBand(i + 1).SetNoDataValue(nodata)
             if not bands == 'NA':
                 if type(bands) == str:
-                    output.GetRasterBand(i+1).SetDescription(bands)
+                    output.GetRasterBand(i + 1).SetDescription(bands)
                 else:
-                    output.GetRasterBand(i+1).SetDescription(bands[i])
+                    output.GetRasterBand(i + 1).SetDescription(bands[i])
     except:
         return 1
     return 0
