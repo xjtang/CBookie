@@ -80,7 +80,7 @@ def report_line(pattern, period, ori, des, lapse=1, recursive=False,
     # initialize output
     if max(period) < cons.MAX_YEAR:
         period2 = [doy_to_ordinal(x * 1000 + 1) for x in range(period[0],
-                    period[1] + 1)]
+                    period[1] + 1, lapse)]
     else:
         period2 = range(doy_to_ordinal(period[0]),
                         doy_to_ordinal(period[1]) + 1, lapse)
