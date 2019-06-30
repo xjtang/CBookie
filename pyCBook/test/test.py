@@ -56,7 +56,8 @@ class test:
         self.fdr_p = self.get_pools(self.fdr_c.pools)
 
         self.a = csv2ndarray(os.path.join(self.area, 'input.csv'))
-        self.a_p = self.get_aggregated(self.a)
+        self.a_c = self.get_aggregated(self.a)
+        self.a_p = self.get_pools(self.a_c.pools)
 
     def read_result(self):
         self.f_2 = yatsm2records(os.path.join(self.output, 'carbon_r1.npz'))
