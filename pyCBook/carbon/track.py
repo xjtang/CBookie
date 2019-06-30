@@ -134,7 +134,7 @@ class carbon:
             if (ts['class'] == self.forest[0]) & (biomass < self.forest_min):
                 biomass = get_biomass(self.p, ts['class'], self.scale_factor2)
         else:
-            if ts['class'] == self.forest[1]:
+            if (self.pid > 0) & (ts['class'] == self.forest[1]):
                 biomass = self.regrow_biomass
             else:
                 biomass = get_biomass(self.p, ts['class'], self.scale_factor2)
