@@ -195,7 +195,7 @@ def report_condense(pattern, ori, des, recursive=False, batch=[1,1]):
                     r['emission'] += records['emission']
                     r['productivity'] += records['productivity']
                     r['net'] += records['net']
-                    r['unreleased'] += record['unreleased']
+                    r['unreleased'] += records['unreleased']
                 log.info('Processed line {}'.format(py))
                 lcount += 1
                 pcount += get_int(report[1])[1]
