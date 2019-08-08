@@ -3,10 +3,11 @@
 # bash script to bookkeeping
 
 # Input Arguments:
-#		-p searching pattern
+#		-s searching pattern
 # 	-i biomass bass image
 #		-m mask image
 #		-n number of jobs
+#		-p parameter files
 #		-R recursive
 #		--overwrite overwrite
 #		ori: origin
@@ -25,7 +26,7 @@ para=/projectnb/landsat/users/xjtang/documents/CBookie/parameters/Colombia/
 while [[ $# > 0 ]]; do
 	InArg="$1"
 	case $InArg in
-		-p)
+		-s)
 			pattern=$2
 			shift
 			;;
@@ -39,6 +40,10 @@ while [[ $# > 0 ]]; do
 			;;
 		-n)
 			njob=$2
+			shift
+			;;
+		-p)
+			para=$2
 			shift
 			;;
 		-R)
