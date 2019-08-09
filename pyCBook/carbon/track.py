@@ -116,11 +116,8 @@ class carbon:
             else:
                 if (self.lc[-1] not in self.forest) & (ts['class'] == self.forest[0]):
                     ts['class'] = self.forest[1]
-                if self.lc[-1] in self.forest:
+                if (self.lc[-1] == self.forest[0]) & (ts['class'] in [4, 0]):
                     self.deforest(ordinal_to_doy(ts['start'] - 1))
-                else:
-                    if self.pools[self.pmain]['biomass'][1] > 0:
-                        self.removal(ordinal_to_doy(ts['start'] - 1))
                 self.new_main_pool(ts)
         else:
             self.new_main_pool(ts)
