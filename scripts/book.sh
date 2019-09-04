@@ -9,6 +9,7 @@
 #		-n number of jobs
 #		-p parameter files
 #		-R recursive
+#		--ignore ingore stable nonregrow
 #		--overwrite overwrite
 #		ori: origin
 #		des: destination
@@ -18,6 +19,7 @@ pattern=yatsm_r*.npz
 njob=1
 img=NA
 mask=NA
+stable=''
 overwrite=''
 recursive=''
 para=/projectnb/landsat/users/xjtang/documents/CBookie/parameters/Colombia/
@@ -49,6 +51,9 @@ while [[ $# > 0 ]]; do
 		-R)
 			recursive='-R '
 			;;
+		--ignore)
+			stable='-s '
+			;;
 		--overwrite)
 			overwrite='--overwrite '
 			;;
@@ -64,5 +69,5 @@ done
 echo 'Total jobs to submit is' $njob
 for i in $(seq 1 $njob); do
     echo 'Submitting job no.' $i 'out of' $njob
-    qsub -j y -N Book_$i -V -b y cd /projectnb/landsat/users/xjtang/documents/CBookie';' python -m pyCBook.book ${overwrite}${recursive}-p $pattern -i $img -m $mask -b $i $njob $ori $para $des
+    qsub -j y -N Book_$i -V -b y cd /projectnb/landsat/users/xjtang/documents/CBookie';' python -m pyCBook.book ${overwrite}${recursive}${stable}-p $pattern -i $img -m $mask -b $i $njob $ori $para $des
 done
