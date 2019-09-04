@@ -91,7 +91,7 @@ class test:
 
     def rerun(self):
         book.book_carbon('yatsm_r*.npz', self.input, self.para, self.output,
-                            'NA', 'NA', True, True)
+                            'NA', 'NA', True, True, True)
         rpt.report_line('carbon_r*.npz', [1990001, 2015365], self.output,
                         self.daily, 1, True)
         rpt.report_line('carbon_r*.npz', [1990, 2016], self.output, self.annual,
