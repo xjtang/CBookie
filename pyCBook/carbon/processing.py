@@ -1,6 +1,7 @@
 """ Module for processing when tracking carbon
 """
 import math
+import numpy as np
 
 from ..common import constants as cons
 
@@ -69,3 +70,20 @@ def run_flux(y1, x1, x2, func, coef, scale_factor):
     if y2 < 0:
         y2 = 0.0
     return y2 * scale_factor
+
+
+def draw(agb, uc, n):
+    """ draw AGB from distribution
+
+    Args:
+        agb (float): initial biomass
+        uc (float): start time
+        n (int): size
+
+    Returns:
+        x (float, ndarray): drawed value(s)
+
+    """
+    ci = agb * uc / 100
+    se = ci / 1.96
+    return np.random.normal(agb, se, n)
