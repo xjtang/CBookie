@@ -23,8 +23,9 @@ class test:
     daily = os.path.join(wd, 'pyCBook/test/data/carbon/outputs/daily')
     annual = os.path.join(wd, 'pyCBook/test/data/carbon/outputs/annual')
     figure = os.path.join(wd, 'pyCBook/test/data/carbon/plots/')
-    se_biomass = -1
+    se_biomass = [-1, 0]
     pixel_size = 0.3 * 0.3
+    n = 10
 
     def __init__(self):
         self.p = [csv2ndarray(os.path.join(self.para, 'biomass.csv')),
@@ -39,13 +40,20 @@ class test:
         self.rr = yatsm2records(os.path.join(self.input, 'yatsm_r6_rr.npz'))
         self.fdr = yatsm2records(os.path.join(self.input, 'yatsm_r7_fdr.npz'))
 
-        self.f_c = self.get_carbon(self.f, self.se_biomass, self.pixel_size)
-        self.df_c = self.get_carbon(self.df, self.se_biomass, self.pixel_size)
-        self.r_c = self.get_carbon(self.r, self.se_biomass, self.pixel_size)
-        self.df2_c = self.get_carbon(self.df2, self.se_biomass, self.pixel_size)
-        self.fu_c = self.get_carbon(self.fu, self.se_biomass, self.pixel_size)
-        self.rr_c = self.get_carbon(self.rr, self.se_biomass, self.pixel_size)
-        self.fdr_c = self.get_carbon(self.fdr, self.se_biomass, self.pixel_size)
+        self.f_c = self.get_carbon(self.f, self.n, self.se_biomass,
+                                    self.pixel_size)
+        self.df_c = self.get_carbon(self.df, self.n, self.se_biomass,
+                                    self.pixel_size)
+        self.r_c = self.get_carbon(self.r, self.n, self.se_biomass,
+                                    self.pixel_size)
+        self.df2_c = self.get_carbon(self.df2, self.n, self.se_biomass,
+                                    self.pixel_size)
+        self.fu_c = self.get_carbon(self.fu, self.n, self.se_biomass,
+                                    self.pixel_size)
+        self.rr_c = self.get_carbon(self.rr, self.n, self.se_biomass,
+                                    self.pixel_size)
+        self.fdr_c = self.get_carbon(self.fdr, self.n, self.se_biomass,
+                                    self.pixel_size)
 
         self.f_p = self.get_pools(self.f_c.pools)
         self.df_p = self.get_pools(self.df_c.pools)
@@ -68,8 +76,8 @@ class test:
         self.rr_2 = yatsm2records(os.path.join(self.output, 'carbon_r6.npz'))
         self.fdr_2 = yatsm2records(os.path.join(self.output, 'carbon_r7.npz'))
 
-    def get_carbon(self, pixel, se_biomass=-1, psize=900):
-        return(carbon(self.p, pixel, se_biomass, psize))
+    def get_carbon(self, pixel, n=1, se_biomass=[-1, 0], psize=0.3*0.3):
+        return(carbon(self.p, pixel, n, se_biomass, psize))
 
     def get_pools(self, pixel):
         return(pools(pixel))
@@ -77,21 +85,21 @@ class test:
     def get_aggregated(self, data):
         return(aggregated(self.p, self.a))
 
-    def record_carbon(self, pixel, se_biomass, des, overwrite=True):
-        carbon = self.get_carbon(pixel, se_biomass)
+    def record_carbon(self, pixel, n, se_biomass, des, overwrite=True):
+        carbon = self.get_carbon(pixel, n, se_biomass)
         record = carbon.pool_record()
         list2csv(record[0], des, overwrite)
         return 0
 
-    def record_flux(self, pixel, se_biomass, des, overwrite=True):
-        carbon = self.get_carbon(pixel, se_biomass)
+    def record_flux(self, pixel, n, se_biomass, des, overwrite=True):
+        carbon = self.get_carbon(pixel, n, se_biomass)
         record = carbon.pool_record()
         list2csv(record[1], des, overwrite)
         return 0
 
     def rerun(self):
         book.book_carbon('yatsm_r*.npz', self.input, self.para, self.output,
-                            'NA', 'NA', True, True, True)
+                            'NA', 'NA', self.n, False, True, True)
         rpt.report_line('carbon_r*.npz', [1990001, 2015365], self.output,
                         self.daily, 1, True)
         rpt.report_line('carbon_r*.npz', [1990, 2016], self.output, self.annual,
