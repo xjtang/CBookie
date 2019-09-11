@@ -4,9 +4,10 @@ from __future__ import division
 
 import numpy as np
 
-from . import get_flux, get_biomass, run_flux
+from . import get_flux, get_biomass, run_flux, gen_dtype, draw
 from ..common import doy_to_ordinal, ordinal_to_doy
 from ..common import constants as cons
+
 
 class carbon:
     """ track carbon based on time series segments
@@ -14,11 +15,11 @@ class carbon:
     Args:
         para (list, ndarray): parameters
         pixel (ndarray): yatsm result for a pixel
-        se_biomass (float): spatially explicit initial biomass
+        n (int): sample size
+        se_biomass (list, float): spatially explicit biomass and uncertainty
         psize (float): size of the pixel
 
     Attributes:
-        dtypes (dtype): template dtype for a carbon pool
         pname (list, str): pool names
         spname (list, str): subpool names
         forest (list, int): classes that is considered forest
@@ -40,6 +41,8 @@ class carbon:
         p: parameters
         px: pixel x coordinate
         py: pixel y coordinate
+        n: sample size
+        dtypes: template dtype for a carbon pool
 
     Functions:
         assess_pixel (): track carbon change of a pixel
@@ -51,7 +54,6 @@ class carbon:
         update_products (): update all product pools to current end date
 
     """
-    dtypes = cons.DTYPES
     pname = cons.PNAME
     spname = cons.SPNAME
     forest = cons.FOREST
@@ -62,11 +64,11 @@ class carbon:
     force_start = doy_to_ordinal(cons.FORCE_START)
     force_end = doy_to_ordinal(cons.FORCE_END)
 
-    def __init__(self, para, pixel, se_biomass=-1.0, psize=(0.3*0.3)):
+    def __init__(self, para, pixel, n=1, se_biomass=[-1,0], psize=(0.3*0.3)):
         self.pixel_size = psize
         self.scale_factor2 = self.scale_factor * self.pixel_size
-        if se_biomass >= 0:
-            self.se_biomass = se_biomass * self.scale_factor2
+        if se_biomass[0] >= 0:
+            self.se_biomass = [x * self.scale_factor2 for x in se_biomass]
         else:
             self.se_biomass = se_biomass
         self.pools = []
@@ -75,8 +77,10 @@ class carbon:
         self.p = para
         self.px = pixel[0]['px']
         self.py = pixel[0]['py']
-        self.regrow_biomass = cons.REGROW_BIOMASS * self.scale_factor2
+        self.regrow_biomass = [x * self.scale_factor2 for x in cons.REGROW_BIOMASS]
         self.forest_min = cons.FOREST_MIN * self.scale_factor2
+        self.n = n
+        self.dtypes = gen_dtype(1, n)
         self.assess_pixel(pixel)
 
     def assess_pixel(self, pixel):
@@ -119,7 +123,7 @@ class carbon:
                 if self.lc[-1] in self.forest:
                     self.deforest(ordinal_to_doy(ts['start'] - 1))
                 else:
-                    if self.pools[self.pmain]['biomass'][1] > 0:
+                    if max(self.pools[self.pmain]['biomass'][1]) > 0:
                         self.removal(ordinal_to_doy(ts['start'] - 1))
                 self.new_main_pool(ts)
         else:
@@ -129,20 +133,24 @@ class carbon:
         self.pid += 1
         self.pmain = self.pid
         self.lc.append(ts['class'])
-        if (self.pid == 0) & (ts['class'] in self.seb_class) & (self.se_biomass >= 0):
-            biomass = self.se_biomass
-            if (ts['class'] == self.forest[0]) & (biomass < self.forest_min):
+        if ((self.pid == 0) & (ts['class'] in self.seb_class) &
+            (self.se_biomass[0] >= 0)):
+            if ((ts['class'] == self.forest[0]) &
+                (self.se_biomass[0] < self.forest_min)):
                 biomass = get_biomass(self.p, ts['class'], self.scale_factor2)
+            else:
+                biomass = self.se_biomass
         else:
             if (self.pid > 0) & (ts['class'] == self.forest[1]):
                 biomass = self.regrow_biomass
             else:
                 biomass = get_biomass(self.p, ts['class'], self.scale_factor2)
         flux = get_flux(self.p, ts['class'])
+        biomass2 = [draw(biomass[0], biomass[1], self.n), np.zeros(self.n)]
         self.pools.extend(np.array([(self.pname[0], self.spname[0], ts['class'],
                             self.pid, self.px, self.py, self.pixel_size,
                             ordinal_to_doy(ts['start']),
-                            ordinal_to_doy(ts['end']), [biomass, 0],
+                            ordinal_to_doy(ts['end']), biomass2,
                             flux['function'], (flux['coef1'], flux['coef2']))],
                             dtype=self.dtypes))
         self.emission(self.pmain)
@@ -153,7 +161,7 @@ class carbon:
         self.pools.extend(np.array([(self.pname[2], self.spname[4], 99,
                             self.pid, self.px, self.py, self.pixel_size,
                             start, ordinal_to_doy(self.force_end),
-                            [biomass, 0.0], 'released', [0, 0])],
+                            [biomass, np.zeros(self.n)], 'released', [0, 0])],
                             dtype=self.dtypes))
 
     def deforest(self, start):
@@ -164,8 +172,8 @@ class carbon:
                 self.pools.extend(np.array([(self.pname[1], x['product'], 99,
                                     self.pid, self.px, self.py, self.pixel_size,
                                     start, ordinal_to_doy(self.force_end),
-                                    [biomass * x['fraction'], 0], x['function'],
-                                    [x['coef1'], x['coef2']])],
+                                    [biomass * x['fraction'], np.zeros(self.n)],
+                                    x['function'], [x['coef1'], x['coef2']])],
                                     dtype=self.dtypes))
                 if x['product'] == 'burned':
                     self.pools[-1]['pool'] = self.pname[2]
@@ -203,14 +211,15 @@ class pools:
         report (): generate daily report of total biomass and fluxes
 
     """
-    dtypes = cons.DTYPES
-    dtypes2 = cons.DTYPES2
     scale_factor = cons.SCALE_FACTOR
 
     def __init__(self, pools):
         self.pools = pools
         self.start = pools[pools['subpool'] == 'above'][0]['start']
         self.end = pools[pools['subpool'] == 'above'][-1]['end']
+        self.n = len(pools[0]['biomass'][0])
+        self.dtypes = gen_dtype(1, self.n)
+        self.dtypes2 = gen_dtype(2, self.n)
 
     def eval(self, t):
         biomass = []
@@ -221,17 +230,17 @@ class pools:
             if (t >= x['start']) & (t <= x['end']):
                 if x['pool'] == 'burned':
                     if t == x['start']:
-                        biomass[-1] = x['biomass'][0]
+                        biomass[-1] = x['biomass'][0].mean()
                     else:
                         biomass[-1] = -9999
-                    net[-1] = x['biomass'][0]
+                    net[-1] = x['biomass'][0].mean()
                 else:
                     biomass[-1] = run_flux(x['biomass'][0],
                                             doy_to_ordinal(x['start']),
                                             doy_to_ordinal(t), x['func'],
                                             x['coef'],
-                                            self.scale_factor * x['psize'])
-                    net[-1] = x['biomass'][0] - biomass[-1]
+                                            self.scale_factor * x['psize']).mean()
+                    net[-1] = x['biomass'][0].mean() - biomass[-1]
         return (biomass, net)
 
     def record(self):
@@ -244,11 +253,11 @@ class pools:
         return (biomass, flux)
 
     def eval_sum(self, t):
-        above = 0.0
-        emission = 0.0
-        productivity = 0.0
-        net = 0.0
-        unreleased = 0.0
+        above = np.zeros(self.n)
+        emission = np.zeros(self.n)
+        productivity = np.zeros(self.n)
+        net = np.zeros(self.n)
+        unreleased = np.zeros(self.n)
         for x in self.pools:
             if t >= x['start']:
                 if t <= x['end']:
@@ -261,12 +270,12 @@ class pools:
                     if x['pool'] == 'product':
                         unreleased += biomass_t
                 else:
-                    biomass_t = 0
+                    biomass_t = np.zeros(self.n)
                     biomass_delta = x['biomass'][0] - x['biomass'][1]
-                if biomass_delta < 0:
-                    productivity += biomass_delta
-                else:
-                    emission += biomass_delta
+                biomass_delta2 = biomass_delta * (biomass_delta < 0)
+                productivity += biomass_delta2
+                biomass_delta2 = biomass_delta * (biomass_delta > 0)
+                emission += biomass_delta2
                 if (t == x['start']) & (x['pool'] == 'burned'):
                     emission += x['biomass'][0]
                 if x['pool'] == 'biomass':
@@ -318,8 +327,6 @@ class aggregated:
         update_pools (): update all pools to current end date
 
     """
-
-    dtypes = cons.DTYPES
     pname = cons.PNAME
     spname = cons.SPNAME
     transitions = cons.TRANSITIONS
@@ -332,6 +339,7 @@ class aggregated:
         self.start = data[0]['start'] * 1000 + 1
         self.end = data[-1]['end'] * 1000 + 365
         self.p = para
+        self.dtypes = gen_dtype(1, 1)
         self.assess_data(data)
 
     def assess_data(self, data):
@@ -351,26 +359,27 @@ class aggregated:
         if area > 0:
             self.pid += 1
             if new:
-                biomass = 0
+                biomass = np.zeros(1)
             else:
-                biomass = get_biomass(self.p, self.forest[1],
-                                        self.scale_factor * area)
+                biomass = np.zeros(1) + get_biomass(self.p, self.forest[1],
+                                                    self.scale_factor * area)[0]
             flux = get_flux(self.p, self.forest[1])
             self.pools.extend(np.array([(self.pname[0], self.spname[0],
                                 self.forest[1], self.pid, 0, 0, area, start,
-                                end, [biomass, 0.0], flux['function'],
+                                end, [biomass, np.zeros(1)], flux['function'],
                                 (flux['coef1'], flux['coef2']))],
                                 dtype=self.dtypes))
 
     def deforest(self, start, end, area, ftype=0):
         if area > 0:
-            biomass = get_biomass(self.p, ftype, self.scale_factor * area)
+            biomass = np.zeros(1) + get_biomass(self.p, ftype,
+                                                self.scale_factor * area)[0]
             for x in self.p[2]:
                 if x['fraction'] > 0:
                     self.pid += 1
                     self.pools.extend(np.array([(self.pname[1], x['product'],
                                         99, self.pid, 0, 0, area, start, end,
-                                        [biomass * x['fraction'], 0.0],
+                                        [biomass * x['fraction'], np.zeros(1)],
                                         x['function'], [x['coef1'],
                                         x['coef2']])], dtype=self.dtypes))
                     if x['product'] == 'burned':
@@ -378,10 +387,10 @@ class aggregated:
 
     def emission(self, pid):
         pool = self.pools[pid]
-        biomass = run_flux(pool['biomass'][0], doy_to_ordinal(pool['start']),
+        biomass = run_flux([pool['biomass'][0]], doy_to_ordinal(pool['start']),
                             doy_to_ordinal(pool['end']), pool['func'],
                             pool['coef'], self.scale_factor * pool['psize'])
-        self.pools[pid]['biomass'][1] = biomass
+        self.pools[pid]['biomass'][1] = biomass[0]
 
     def update_pools(self):
         for pid in range(0, self.pid + 1):

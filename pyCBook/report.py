@@ -21,7 +21,7 @@ import numpy as np
 from .common import (log, get_files, get_int, doy_to_ordinal, ordinal_to_doy,
                         manage_batch)
 from .io import yatsm2pixels, yatsm2records
-from .carbon import pools
+from .carbon import pools, gen_dtype
 from .common import constants as cons
 
 
@@ -87,6 +87,7 @@ def report_line(pattern, period, ori, des, lapse=1, recursive=False,
 
     # loop through all files
     lcount = 0
+    _size = 0
     log.info('Start reporting carbon...')
     for _line in carbon_list:
         try:
@@ -95,9 +96,14 @@ def report_line(pattern, period, ori, des, lapse=1, recursive=False,
             px = -1
             pcount = 0
             r = []
+            if _size == 0:
+                _size = len(pixels[0][0]['biomass'][0])
             if len(pixels) > 0:
-                r = np.array([(ordinal_to_doy(x), 0.0, 0.0, 0.0, 0.0,
-                                0.0) for x in period2], dtype=cons.DTYPES2)
+                r = np.array([(ordinal_to_doy(x), np.zeros(_size),
+                                np.zeros(_size), np.zeros(_size),
+                                np.zeros(_size),
+                                np.zeros(_size)) for x in period2],
+                                dtype=gen_dtype(2, _size))
                 for pixel in pixels:
                     px = pixel[0]['px']
                     pixel_pools = pools(pixel)
@@ -245,7 +251,8 @@ def report_sum(pattern, ori, des, overwrite=False, recursive=False):
         2: error when searching files
         3: found no file
         4: error processing
-        5: error writing output
+        5: error reducing
+        6: error writing output
 
     """
     # check if output already exists
@@ -300,10 +307,22 @@ def report_sum(pattern, ori, des, overwrite=False, recursive=False):
         log.error('Failed to process anything.')
         return 4
 
+    # reducing results
+    log.info('Start reducing...')
+    dtype = [('date', '<i4'), ('above', '<f4'), ('emission', '<f8'),
+                ('productivity', '<f8'), ('net', '<f8'),
+                ('unreleased', '<f8')]
+    r2 = np.array([(x, 0.0, 0.0, 0.0, 0.0, 0.0) for x in r['date']],
+                    dtype=cons.DTYPES)
+    r2['emission'] = r['emission'].mean(1)
+    r2['productivity'] = r['productivity'].mean(1)
+    r2['net'] = r['net'].mean(1)
+    r2['unreleased'] = r['unreleased'].mean(1)
+
     # write output
     log.info('Writing output...')
     try:
-        np.savetxt(des, r, delimiter=',', fmt=cons.FMT, header=cons.HEADER,
+        np.savetxt(des, r2, delimiter=',', fmt=cons.FMT, header=cons.HEADER,
                     comments='')
     except:
         log.error('Failed to write output to {}'.format(des))

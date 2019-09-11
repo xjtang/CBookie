@@ -5,6 +5,7 @@
         -i (img): biomass bass image
         -m (mask): mask image
         -s (stable): ignore stable non regrow
+        -n (n): monte carlo sample size
         -b (batch): batch process, thisjob and totaljob
         -R (recursive): recursive when seaching files
         --overwrite: overwrite or not
@@ -24,7 +25,7 @@ from .carbon import carbon
 from .common import constants as cons
 
 
-def book_carbon(pattern, ori, para, des, img='NA', mask='NA', stable=False,
+def book_carbon(pattern, ori, para, des, img='NA', mask='NA', _size=1, stable=False,
                 overwrite=False, recursive=False, batch=[1,1]):
     """ carbon bookkeeping on YATSM results
 
@@ -35,6 +36,7 @@ def book_carbon(pattern, ori, para, des, img='NA', mask='NA', stable=False,
         des (str): place to save outputs
         img (str): biomass base image
         mask (str): mask image
+        _size (int): monte carlo sample size
         overwrite (bool): overwrite or not
         recursive (bool): recursive when searching file, or not
         batch (list, int): batch processing, [thisjob, totaljob]
@@ -94,11 +96,12 @@ def book_carbon(pattern, ori, para, des, img='NA', mask='NA', stable=False,
         log.info('Reading biomass base image...')
         try:
             biomass = image2array(img, 1)
+            uc = image2array(img, 2)
         except:
             log.error('Failed to read biomass bass image: {}'.format(img))
             return 4
     else:
-        se_biomass = -1
+        se_biomass = [-1, 0]
     if mask != 'NA':
         log.info('Reading mask image...')
         try:
@@ -137,8 +140,9 @@ def book_carbon(pattern, ori, para, des, img='NA', mask='NA', stable=False,
                                 mask3 = mask2[py, px]
                             if mask3 == 0:
                                 if img != 'NA':
-                                    se_biomass = biomass[py, px]
-                                carbon_pixel = carbon(p, pixel, se_biomass)
+                                    se_biomass = [biomass[py, px],
+                                            biomass[py, px] * uc[py, px] / 100]
+                                carbon_pixel = carbon(p, pixel, _size, se_biomass)
                                 records.extend(carbon_pixel.pools)
                             else:
                                 mcount += 1
@@ -182,10 +186,12 @@ if __name__ == '__main__':
     parser.add_argument('-b', '--batch', action='store', type=int, nargs=2,
                         dest='batch', default=[1,1],
                         help='batch process, [thisjob, totaljob]')
-    parser.add_argument('-i', '--image', action='store', type=str,
-                        dest='img', default='NA', help='biomass base image')
+    parser.add_argument('-i', '--image', action='store', type=str, dest='img',
+                        default='NA', help='biomass base image')
     parser.add_argument('-m', '--mask', action='store', type=str,
                         dest='mask', default='NA', help='mask image')
+    parser.add_argument('-n', '--size', action='store', type=int, dest='n',
+                        default=1, help='monte carlo sample size')
     parser.add_argument('-s', '--stable', action='store_true',
                         help='ignore stable non regrow or not')
     parser.add_argument('-R', '--recursive', action='store_true',
@@ -198,6 +204,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # check arguments
+    if not args.stable:
+        args.n = 1
     if not 1 <= args.batch[0] <= args.batch[1]:
         log.error('Invalid batch inputs: [{}, {}]'.format(args.batch[0],
                     args.batch[1]))
@@ -209,6 +217,7 @@ if __name__ == '__main__':
     log.info('Looking for {}'.format(args.pattern))
     log.info('In {}'.format(args.ori))
     log.info('Parameters in {}'.format(args.para))
+    log.info('Run {} times'.format(args.n))
     log.info('Saving in {}'.format(args.des))
     if args.img != 'NA':
         log.info('Biomass base image: {}'.format(args.img))

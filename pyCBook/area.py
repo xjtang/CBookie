@@ -72,7 +72,7 @@ def area_carbon(ori, para, des, period=[2001, 2015], lapse=1, overwrite=False):
             period2 = range(doy_to_ordinal(period[0]),
                             doy_to_ordinal(period[1]) + 1, lapse)
         r = np.array([(ordinal_to_doy(x), 0.0, 0.0, 0.0, 0.0,
-                        0.0) for x in period2], dtype=cons.DTYPES2)
+                        0.0) for x in period2], dtype=cons.DTYPES)
     except:
         log.error('Failed to initialize output')
         return 3
@@ -83,10 +83,10 @@ def area_carbon(ori, para, des, period=[2001, 2015], lapse=1, overwrite=False):
         r1 = aggregated(p, actvt)
         r2 = pools(r1.pools)
         r3 = r2.report(period, lapse)
-        r['emission'] = r3['emission']
-        r['productivity'] = r3['productivity']
-        r['net'] = r3['net']
-        r['unreleased'] = r3['unreleased']
+        r['emission'] = r3['emission'].mean(1)
+        r['productivity'] = r3['productivity'].mean(1)
+        r['net'] = r3['net'].mean(1)
+        r['unreleased'] = r3['unreleased'].mean(1)
     except:
         log.error('Failed to process.')
         return 3
