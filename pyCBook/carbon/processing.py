@@ -19,7 +19,7 @@ def get_biomass(para, _class, scale_factor):
 
     """
     para = para[0]
-    return [x * scale_factor for x in para[para['id'] == _class][0][['biomass', 'uncertainty']]]
+    return [x * scale_factor for x in para[para['id'] == _class][['biomass', 'uncertainty']][0]]
 
 
 def get_flux(para, _class):
