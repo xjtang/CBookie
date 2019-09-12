@@ -94,7 +94,7 @@ def area_carbon(ori, para, des, period=[2001, 2015], lapse=1, overwrite=False):
     # writing output
     log.info('Writing output...')
     try:
-        np.savetxt(des, r, delimiter=',', fmt=cons.FMT, header=cons.HEADER,
+        np.savetxt(des, r, delimiter=',', fmt=cons.FMT2, header=cons.HEADER2,
                     comments='')
     except:
         log.error('Failed to save results to {}'.format(des))

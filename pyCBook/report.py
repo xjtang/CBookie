@@ -309,15 +309,16 @@ def report_sum(pattern, ori, des, overwrite=False, recursive=False):
 
     # reducing results
     log.info('Start reducing...')
-    dtype = [('date', '<i4'), ('above', '<f4'), ('emission', '<f8'),
-                ('productivity', '<f8'), ('net', '<f8'),
-                ('unreleased', '<f8')]
-    r2 = np.array([(x, 0.0, 0.0, 0.0, 0.0, 0.0) for x in r['date']],
-                    dtype=cons.DTYPES)
+    r2 = np.array([(x, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                    0.0) for x in r['date']], dtype=cons.DTYPES2)
     r2['emission'] = r['emission'].mean(1)
     r2['productivity'] = r['productivity'].mean(1)
     r2['net'] = r['net'].mean(1)
     r2['unreleased'] = r['unreleased'].mean(1)
+    r2['emissionUC'] = r['emission'].std(1) * 1.96
+    r2['productivityUC'] = r['productivity'].std(1) * 1.96
+    r2['netUC'] = r['net'].std(1) * 1.96
+    r2['unreleasedUC'] = r['unreleased'].std(1) * 1.96
 
     # write output
     log.info('Writing output...')
