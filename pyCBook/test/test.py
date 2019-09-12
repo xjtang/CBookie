@@ -25,7 +25,7 @@ class test:
     figure = os.path.join(wd, 'pyCBook/test/data/carbon/plots/')
     se_biomass = [-1, 0]
     pixel_size = 0.3 * 0.3
-    n = 10
+    n = 100
 
     def __init__(self):
         self.p = [csv2ndarray(os.path.join(self.para, 'biomass.csv')),
