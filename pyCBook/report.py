@@ -96,9 +96,9 @@ def report_line(pattern, period, ori, des, lapse=1, recursive=False,
             px = -1
             pcount = 0
             r = []
-            if _size == 0:
-                _size = len(pixels[0][0]['biomass'][0])
             if len(pixels) > 0:
+                if _size == 0:
+                    _size = len(pixels[0][0]['biomass'][0])
                 r = np.array([(ordinal_to_doy(x), np.zeros(_size),
                                 np.zeros(_size), np.zeros(_size),
                                 np.zeros(_size),
