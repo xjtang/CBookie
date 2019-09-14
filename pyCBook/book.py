@@ -98,7 +98,7 @@ def book_carbon(pattern, ori, para, des, img='NA', mask='NA', _size=1, stable=Fa
             biomass = image2array(img, 1)
             try:
                 uc = image2array(img, 2)
-            else:
+            except:
                 uc = biomass * 0
         except:
             log.error('Failed to read biomass bass image: {}'.format(img))
