@@ -25,6 +25,7 @@ stable=''
 overwrite=''
 recursive=''
 para=/projectnb/landsat/users/xjtang/documents/CBookie/parameters/Colombia/
+seed=NA
 
 # parse input arguments
 while [[ $# > 0 ]]; do
@@ -46,13 +47,12 @@ while [[ $# > 0 ]]; do
 			njob=$2
 			shift
 			;;
-		-n)
-			size=$2
-			shift
-			;;
 		-p)
 			para=$2
 			shift
+			;;
+		-e)
+			seed=/projectnb/landsat/users/xjtang/documents/CBookie/pyCBook/test/test.py
 			;;
 		-R)
 			recursive='-R '
@@ -75,5 +75,5 @@ done
 echo 'Total jobs to submit is' $njob
 for i in $(seq 1 $njob); do
     echo 'Submitting job no.' $i 'out of' $njob
-    qsub -j y -N Book_$i -V -b y cd /projectnb/landsat/users/xjtang/documents/CBookie';' python -m pyCBook.book ${overwrite}${recursive}${stable}-p $pattern -i $img -m $mask -n $size -b $i $njob $ori $para $des
+    qsub -j y -N Book_$i -V -b y cd /projectnb/landsat/users/xjtang/documents/CBookie';' python -m pyCBook.book ${overwrite}${recursive}${stable}-p $pattern -i $img -m $mask -e $seed -b $i $njob $ori $para $des
 done
