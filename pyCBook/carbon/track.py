@@ -15,7 +15,7 @@ class carbon:
     Args:
         para (list, ndarray): parameters
         pixel (ndarray): yatsm result for a pixel
-        n (int): sample size
+        seed (str): monte carlo simulation seed
         se_biomass (list, float): spatially explicit biomass and uncertainty
         psize (float): size of the pixel
 
@@ -64,13 +64,18 @@ class carbon:
     force_start = doy_to_ordinal(cons.FORCE_START)
     force_end = doy_to_ordinal(cons.FORCE_END)
 
-    def __init__(self, para, pixel, n=1, se_biomass=[-1,0], psize=(0.3*0.3)):
+    def __init__(self, para, pixel, seed='NA', se_biomass=[-1,0], psize=(0.3*0.3)):
         self.pixel_size = psize
         self.scale_factor2 = self.scale_factor * self.pixel_size
         if se_biomass[0] >= 0:
             self.se_biomass = [x * self.scale_factor2 for x in se_biomass]
         else:
             self.se_biomass = se_biomass
+        try:
+            self.seed = np.load(seed)
+        except:
+            self.seed = np.array([-1.96, 0, 1.96])
+        self.n = len(self.seed)
         self.pools = []
         self.lc = []
         self.pid = -1
@@ -79,8 +84,7 @@ class carbon:
         self.py = pixel[0]['py']
         self.regrow_biomass = [x * self.scale_factor2 for x in cons.REGROW_BIOMASS]
         self.forest_min = cons.FOREST_MIN * self.scale_factor2
-        self.n = n
-        self.dtypes = gen_dtype(1, n)
+        self.dtypes = gen_dtype(1, self.n)
         self.assess_pixel(pixel)
 
     def assess_pixel(self, pixel):
@@ -146,7 +150,7 @@ class carbon:
             else:
                 biomass = get_biomass(self.p, ts['class'], self.scale_factor2)
         flux = get_flux(self.p, ts['class'])
-        biomass2 = [draw(biomass[0], biomass[1], self.n), np.zeros(self.n)]
+        biomass2 = [draw(biomass[0], biomass[1], self.seed), np.zeros(self.n)]
         self.pools.extend(np.array([(self.pname[0], self.spname[0], ts['class'],
                             self.pid, self.px, self.py, self.pixel_size,
                             ordinal_to_doy(ts['start']),

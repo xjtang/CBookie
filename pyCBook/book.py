@@ -25,7 +25,7 @@ from .carbon import carbon
 from .common import constants as cons
 
 
-def book_carbon(pattern, ori, para, des, img='NA', mask='NA', _size=1, stable=False,
+def book_carbon(pattern, ori, para, des, img='NA', mask='NA', seed='NA', stable=False,
                 overwrite=False, recursive=False, batch=[1,1]):
     """ carbon bookkeeping on YATSM results
 
@@ -36,7 +36,7 @@ def book_carbon(pattern, ori, para, des, img='NA', mask='NA', _size=1, stable=Fa
         des (str): place to save outputs
         img (str): biomass base image
         mask (str): mask image
-        _size (int): monte carlo sample size
+        seed (int): monte carlo simulation seed
         overwrite (bool): overwrite or not
         recursive (bool): recursive when searching file, or not
         batch (list, int): batch processing, [thisjob, totaljob]
@@ -119,8 +119,7 @@ def book_carbon(pattern, ori, para, des, img='NA', mask='NA', _size=1, stable=Fa
     count = 0
     log.info('Start booking carbon...')
     for yatsm in yatsm_list:
-        if True:
-        #try:
+        try:
             records = []
             py = get_int(yatsm[1])[0]
             px = -1
@@ -146,7 +145,7 @@ def book_carbon(pattern, ori, para, des, img='NA', mask='NA', _size=1, stable=Fa
                                 if img != 'NA':
                                     se_biomass = [biomass[py, px],
                                             biomass[py, px] * uc[py, px] / 100]
-                                carbon_pixel = carbon(p, pixel, _size, se_biomass)
+                                carbon_pixel = carbon(p, pixel, seed, se_biomass)
                                 records.extend(carbon_pixel.pools)
                             else:
                                 mcount += 1
@@ -166,9 +165,9 @@ def book_carbon(pattern, ori, para, des, img='NA', mask='NA', _size=1, stable=Fa
                 log.warning('Line {} all masked.'.format(py))
             np.savez(os.path.join(des,'carbon_r{}.npz'.format(py)), records)
             count += 1
-        #except:
-        #    log.warning('Failed to process line {} pixel {}.'.format(py, px))
-        #    continue
+        except:
+            log.warning('Failed to process line {} pixel {}.'.format(py, px))
+            continue
 
     # nothing is processed, all failed
     if count == 0:
@@ -194,8 +193,8 @@ if __name__ == '__main__':
                         default='NA', help='biomass base image')
     parser.add_argument('-m', '--mask', action='store', type=str,
                         dest='mask', default='NA', help='mask image')
-    parser.add_argument('-n', '--size', action='store', type=int, dest='n',
-                        default=1, help='monte carlo sample size')
+    parser.add_argument('-e', '--seed', action='store', type=str, dest='seed',
+                        default='NA', help='monte carlo simulation seed')
     parser.add_argument('-s', '--stable', action='store_true',
                         help='ignore stable non regrow or not')
     parser.add_argument('-R', '--recursive', action='store_true',
@@ -209,7 +208,7 @@ if __name__ == '__main__':
 
     # check arguments
     if not args.stable:
-        args.n = 1
+        args.seed = 'NA'
     if not 1 <= args.batch[0] <= args.batch[1]:
         log.error('Invalid batch inputs: [{}, {}]'.format(args.batch[0],
                     args.batch[1]))
@@ -221,7 +220,6 @@ if __name__ == '__main__':
     log.info('Looking for {}'.format(args.pattern))
     log.info('In {}'.format(args.ori))
     log.info('Parameters in {}'.format(args.para))
-    log.info('Run {} times'.format(args.n))
     log.info('Saving in {}'.format(args.des))
     if args.img != 'NA':
         log.info('Biomass base image: {}'.format(args.img))
@@ -229,6 +227,8 @@ if __name__ == '__main__':
         log.info('Mask image: {}'.format(args.mask))
     if args.stable:
         log.info('Ignoring stable non regrow pixels.')
+    if args.seed != 'NA':
+        log.info('Monte Carlo seed from: {}'.format(args.seed))
     if args.recursive:
         log.info('Recursive seaching.')
     if args.overwrite:
@@ -236,5 +236,5 @@ if __name__ == '__main__':
 
     # run function to bookkeeping
     book_carbon(args.pattern, args.ori, args.para, args.des, args.img,
-                args.mask, args.n, args.stable, args.overwrite, args.recursive,
+                args.mask, args.seed, args.stable, args.overwrite, args.recursive,
                 args.batch)

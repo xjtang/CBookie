@@ -71,22 +71,19 @@ def run_flux(y1, x1, x2, func, coef, scale_factor):
     return y2 * scale_factor
 
 
-def draw(agb, ci, n):
+def draw(agb, ci, seed):
     """ draw AGB from distribution
 
     Args:
         agb (float): initial biomass
         ci (float): confidence interval
-        n (int): sample size
+        seed (float, ndarray): monte carlo seed
 
     Returns:
         x (float, ndarray): drawed value(s)
 
     """
-    if ci <= 0:
-        return np.zeros(n) + agb
-    se = ci / 1.96
-    return np.random.normal(agb, se, n)
+    return agb + seed * (ci / 1.96)
 
 
 def gen_dtype(_type, size):
