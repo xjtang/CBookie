@@ -6,7 +6,7 @@
 #		-s searching pattern
 # 	-i biomass bass image
 #		-m mask image
-#		-n monte carlo sample size
+#		-e monte carlo simulation
 #		-j number of jobs
 #		-p parameter files
 #		-R recursive
@@ -52,7 +52,7 @@ while [[ $# > 0 ]]; do
 			shift
 			;;
 		-e)
-			seed=/projectnb/landsat/users/xjtang/documents/CBookie/pyCBook/test/test.py
+			seed=/projectnb/landsat/users/xjtang/documents/CBookie/pyCBook/test/seed.npy
 			;;
 		-R)
 			recursive='-R '
