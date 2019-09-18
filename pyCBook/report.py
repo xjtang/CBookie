@@ -315,10 +315,16 @@ def report_sum(pattern, ori, des, overwrite=False, recursive=False):
     r2['productivity'] = r['productivity'].mean(1)
     r2['net'] = r['net'].mean(1)
     r2['unreleased'] = r['unreleased'].mean(1)
-    r2['emissionUC'] = r['emission'].std(1) * 1.96
-    r2['productivityUC'] = r['productivity'].std(1) * 1.96
-    r2['netUC'] = r['net'].std(1) * 1.96
-    r2['unreleasedUC'] = r['unreleased'].std(1) * 1.96
+    if len(r['emission'][0]) <= 3:
+        r2['emissionUC'] = r['emission'][:,1] - r['emission'][:,0]
+        r2['productivityUC'] = r['productivity'][:,1] - r['productivity'][:,0]
+        r2['netUC'] = r['net'][:,1] - r['net'][:,0]
+        r2['unreleasedUC'] = r['unreleased'][1,0] - r['unreleased'][:,0]
+    else:
+        r2['emissionUC'] = r['emission'].std(1) * 1.96
+        r2['productivityUC'] = r['productivity'].std(1) * 1.96
+        r2['netUC'] = r['net'].std(1) * 1.96
+        r2['unreleasedUC'] = r['unreleased'].std(1) * 1.96
 
     # write output
     log.info('Writing output...')
