@@ -25,7 +25,7 @@ class test:
     figure = os.path.join(wd, 'pyCBook/test/data/carbon/plots/')
     # seed = os.path.join(wd, 'pyCBook/test/seed.npy')
     seed = 'NA'
-    se_biomass = [-1, 0]
+    se_biomass = [-9999, 0]
     pixel_size = 0.3 * 0.3
 
     def __init__(self):
