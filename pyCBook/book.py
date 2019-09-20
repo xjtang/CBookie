@@ -5,7 +5,7 @@
         -i (img): biomass bass image
         -m (mask): mask image
         -s (stable): ignore stable non regrow
-        -n (n): monte carlo sample size
+        -e (seed): monte carlo simulation seed
         -b (batch): batch process, thisjob and totaljob
         -R (recursive): recursive when seaching files
         --overwrite: overwrite or not
