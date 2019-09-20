@@ -64,10 +64,11 @@ class carbon:
     force_start = doy_to_ordinal(cons.FORCE_START)
     force_end = doy_to_ordinal(cons.FORCE_END)
 
-    def __init__(self, para, pixel, seed='NA', se_biomass=[-1,0], psize=(0.3*0.3)):
+    def __init__(self, para, pixel, seed='NA', se_biomass=[-9999,0],
+                    psize=(0.3*0.3)):
         self.pixel_size = psize
         self.scale_factor2 = self.scale_factor * self.pixel_size
-        if se_biomass[0] >= 0:
+        if se_biomass[0] > -9999:
             self.se_biomass = [x * self.scale_factor2 for x in se_biomass]
         else:
             self.se_biomass = se_biomass
@@ -138,12 +139,8 @@ class carbon:
         self.pmain = self.pid
         self.lc.append(ts['class'])
         if ((self.pid == 0) & (ts['class'] in self.seb_class) &
-            (self.se_biomass[0] >= 0)):
-            if ((ts['class'] == self.forest[0]) &
-                (self.se_biomass[0] < self.forest_min)):
-                biomass = get_biomass(self.p, ts['class'], self.scale_factor2)
-            else:
-                biomass = self.se_biomass
+            (self.se_biomass[0] > -9999)):
+            biomass = self.se_biomass
         else:
             if (self.pid > 0) & (ts['class'] == self.forest[1]):
                 biomass = self.regrow_biomass
@@ -276,10 +273,13 @@ class pools:
                 else:
                     biomass_t = np.zeros(self.n)
                     biomass_delta = x['biomass'][0] - x['biomass'][1]
-                biomass_delta2 = biomass_delta * (biomass_delta < 0)
-                productivity += biomass_delta2
-                biomass_delta2 = biomass_delta * (biomass_delta > 0)
-                emission += biomass_delta2
+                if x['pool'] in ['product', 'burned']:
+                    emission += biomass_delta
+                else:
+                    biomass_delta2 = biomass_delta * (biomass_delta < 0)
+                    productivity += biomass_delta2
+                    biomass_delta2 = biomass_delta * (biomass_delta > 0)
+                    emission += biomass_delta2
                 if (t == x['start']) & (x['pool'] == 'burned'):
                     emission += x['biomass'][0]
                 if x['pool'] == 'biomass':

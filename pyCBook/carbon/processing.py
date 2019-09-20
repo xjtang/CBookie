@@ -52,22 +52,28 @@ def run_flux(y1, x1, x2, func, coef, scale_factor):
         y2 (float): biomass at x2
 
     """
+    emit = False
     if x1 == x2:
         return y1
     y1 = y1 / scale_factor
     if func == 'linear':
         y2 = y1 * (1 - (x2 - x1) / (cons.DIY / coef[0]))
+        emit = True
     elif func == 'logdc':
         y2 = y1 * np.exp(-(x2 - x1) / (cons.DIY / coef[0]))
+        emit = True
     elif func == 'const':
         y2 = y1 + coef[0] * (x2 - x1) / cons.DIY
+        emit = True
     elif func == 'log':
         y2 = coef[0]*np.log(np.exp((y1-coef[1])/coef[0])+(x2-x1)/cons.DIY)+coef[1]
     elif func == 'none':
         y2 = y1
     else:
         y2 = y1 * 0.0
-    y2[y2 < 0] = 0
+    y2[(y1 >= 0) & (y2 < 0)] = 0
+    if emit:
+        y2[(y1 <= 0)] = 0
     return y2 * scale_factor
 
 

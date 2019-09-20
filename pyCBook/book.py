@@ -104,7 +104,7 @@ def book_carbon(pattern, ori, para, des, img='NA', mask='NA', seed='NA', stable=
             log.error('Failed to read biomass bass image: {}'.format(img))
             return 4
     else:
-        se_biomass = [-1, 0]
+        se_biomass = [-9999, 0]
     if mask != 'NA':
         log.info('Reading mask image...')
         try:
