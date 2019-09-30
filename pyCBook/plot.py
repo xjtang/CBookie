@@ -107,9 +107,11 @@ def plot_report(ori, des='NA',cum=True):
         log.info('Calculating non-cumulative results...')
         try:
             for i in range(len(data) - 1, 0, -1):
+                data[i]['burned'] -= data[i - 1]['burned']
                 data[i]['net'] -= data[i - 1]['net']
                 data[i]['emission'] -= data[i - 1]['emission']
                 data[i]['productivity'] -= data[i - 1]['productivity']
+            data['burned'] = data['burned'] / sf
             data['net'] = data['net'] / sf
             data['emission'] = data['emission'] / sf
             data['productivity'] = data['productivity'] / sf

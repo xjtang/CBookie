@@ -254,7 +254,8 @@ class pools:
         return (biomass, flux)
 
     def eval_sum(self, t):
-        above = np.zeros(self.n)
+        # above = np.zeros(self.n)
+        burned = np.zeros(self.n)
         emission = np.zeros(self.n)
         productivity = np.zeros(self.n)
         net = np.zeros(self.n)
@@ -273,8 +274,10 @@ class pools:
                 else:
                     biomass_t = np.zeros(self.n)
                     biomass_delta = x['biomass'][0] - x['biomass'][1]
-                if x['pool'] in ['product', 'burned']:
+                if x['pool'] == 'product':
                     emission += biomass_delta
+                elif x['pool'] == 'burned':
+                    burned += biomass_delta
                 else:
                     biomass_delta2 = biomass_delta * (biomass_delta < 0)
                     productivity += biomass_delta2
@@ -282,10 +285,10 @@ class pools:
                     emission += biomass_delta2
                 if (t == x['start']) & (x['pool'] == 'burned'):
                     emission += x['biomass'][0]
-                if x['pool'] == 'biomass':
-                    above += biomass_t
-        net = emission + productivity
-        return np.array([(t, above, emission, productivity, net, unreleased)],
+                # if x['pool'] == 'biomass':
+                #     above += biomass_t
+        net = emission + productivity + burned
+        return np.array([(t, burned, emission, productivity, net, unreleased)],
                         dtype=self.dtypes2)
 
     def report(self, period, lapse=1):

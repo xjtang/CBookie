@@ -1,8 +1,8 @@
 """ Module for commonly used constants
 """
-DTYPES = [('date', '<i4'), ('above', '<f4'), ('emission', '<f8'),
+DTYPES = [('date', '<i4'), ('burned', '<f8'), ('emission', '<f8'),
             ('productivity', '<f8'), ('net', '<f8'), ('unreleased', '<f8')]
-DTYPES2 = [('date', '<i4'), ('above', '<f4'), ('aboveUC', '<f4'),
+DTYPES2 = [('date', '<i4'), ('burned', '<f8'), ('burnedUC', '<f8'),
             ('emission', '<f8'), ('emissionUC', '<f8'),
             ('productivity', '<f8'), ('productivityUC', '<f8'),
             ('net', '<f8'), ('netUC', '<f8'),
@@ -20,9 +20,9 @@ FORCE_END = 2020001
 TRANSITIONS = ['sec', 'for_pas', 'for_sec', 'sec_gain', 'sec_pas']
 MAP_NODATA = -9999
 MAX_YEAR = 3000
-HEADER = 'date,above,a_uc,emission,e_uc,productivity,p_uc,net,n_uc,unreleased,u_uc'
+HEADER = 'date,burned,b_uc,emission,e_uc,productivity,p_uc,net,n_uc,unreleased,u_uc'
 FMT = '%d,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f'
-HEADER2 = 'date,above,emission,productivity,net,unreleased'
+HEADER2 = 'date,burned,emission,productivity,net,unreleased'
 FMT2 = '%d,%f,%f,%f,%f,%f'
 AREA = 518131758 * 30 * 30 / 100 / 100
 SAREA = 13755 * 30 * 30 / 100 / 100

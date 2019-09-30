@@ -108,6 +108,7 @@ def report_line(pattern, period, ori, des, lapse=1, recursive=False,
                     px = pixel[0]['px']
                     pixel_pools = pools(pixel)
                     record = pixel_pools.report(period, lapse)
+                    r['burned'] += record['burned']
                     r['emission'] += record['emission']
                     r['productivity'] += record['productivity']
                     r['net'] += record['net']
@@ -198,6 +199,7 @@ def report_condense(pattern, ori, des, recursive=False, batch=[1,1]):
                 if lcount == 0:
                     r = records
                 else:
+                    r['burned'] += records['burned']
                     r['emission'] += records['emission']
                     r['productivity'] += records['productivity']
                     r['net'] += records['net']
@@ -288,6 +290,7 @@ def report_sum(pattern, ori, des, overwrite=False, recursive=False):
                 if pcount == 0:
                     r = records
                 else:
+                    r['burned'] += records['burned']
                     r['emission'] += records['emission']
                     r['productivity'] += records['productivity']
                     r['net'] += records['net']
@@ -311,16 +314,19 @@ def report_sum(pattern, ori, des, overwrite=False, recursive=False):
     log.info('Start reducing...')
     r2 = np.array([(x, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
                     0.0) for x in r['date']], dtype=cons.DTYPES2)
+    r2['burned'] = r['burned'].mean(1)
     r2['emission'] = r['emission'].mean(1)
     r2['productivity'] = r['productivity'].mean(1)
     r2['net'] = r['net'].mean(1)
     r2['unreleased'] = r['unreleased'].mean(1)
     if len(r['emission'][0]) <= 3:
+        r2['burnedUC'] = r['burned'][:,1] - r['burned'][:,0]
         r2['emissionUC'] = r['emission'][:,1] - r['emission'][:,0]
         r2['productivityUC'] = r['productivity'][:,1] - r['productivity'][:,0]
         r2['netUC'] = r['net'][:,1] - r['net'][:,0]
         r2['unreleasedUC'] = r['unreleased'][1,0] - r['unreleased'][:,0]
     else:
+        r2['burnedUC'] = r['burned'].std(1) * 1.96
         r2['emissionUC'] = r['emission'].std(1) * 1.96
         r2['productivityUC'] = r['productivity'].std(1) * 1.96
         r2['netUC'] = r['net'].std(1) * 1.96

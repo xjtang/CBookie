@@ -81,12 +81,14 @@ def plot_book(book, bar=False, title='Cumulative Emission',
     x = book['date']//1000 + (book['date'] - (book['date']//1000*1000)) / cons.DIY
     # make plot
     if bar:
-        plot.bar(x, book['emission'], color='red')
+        plot.bar(x, book['emission'] + book['burned'], color='red')
+        plot.bar(x, book['burned'], color='blue')
         plot.bar(x, book['productivity'], color='green')
         plot.plot(x, book['net'], '--', c='0.5', lw=1)
     else:
         plot.plot(x, book['net'], '--', c='0.5', lw=1)
-        plot.plot(x, book['emission'], 'r-', lw=2)
+        plot.plot(x, book['emission'] + book['burned'], 'r-', lw=2)
+        plot.plot(x, book['burned'], 'b-', lw=2)
         plot.plot(x, book['productivity'], 'g-', lw=2)
     # juice up the plot
     plot.ylabel(ylabel)

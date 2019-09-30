@@ -110,7 +110,7 @@ def gen_dtype(_type, size):
                     ('biomass', '<f8', (2, size)), ('func', 'U10'),
                     ('coef', '<f4', (2, ))]
     elif _type == 2:
-        dtype = [('date', '<i4'), ('above', '<f4', (size, )),
+        dtype = [('date', '<i4'), ('burned', '<f8', (size, )),
                     ('emission', '<f8', (size, )),
                     ('productivity', '<f8', (size, )), ('net', '<f8', (size, )),
                     ('unreleased', '<f8', (size, ))]
