@@ -255,6 +255,7 @@ class pools:
 
     def eval_sum(self, t):
         # above = np.zeros(self.n)
+        t = doy_to_ordinal(t) - 1
         burned = np.zeros(self.n)
         emission = np.zeros(self.n)
         productivity = np.zeros(self.n)
@@ -265,8 +266,7 @@ class pools:
                 if t <= x['end']:
                     biomass_t = run_flux(x['biomass'][0],
                                             doy_to_ordinal(x['start']),
-                                            doy_to_ordinal(t), x['func'],
-                                            x['coef'],
+                                            t, x['func'], x['coef'],
                                             self.scale_factor * x['psize'])
                     biomass_delta = x['biomass'][0] - biomass_t
                     if x['pool'] == 'product':
@@ -284,7 +284,7 @@ class pools:
                     biomass_delta2 = biomass_delta * (biomass_delta > 0)
                     emission += biomass_delta2
                 if (t == x['start']) & (x['pool'] == 'burned'):
-                    emission += x['biomass'][0]
+                    burned += x['biomass'][0]
                 # if x['pool'] == 'biomass':
                 #     above += biomass_t
         net = emission + productivity + burned
