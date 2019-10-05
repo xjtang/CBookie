@@ -324,7 +324,7 @@ def report_sum(pattern, ori, des, overwrite=False, recursive=False):
         r2['emissionUC'] = r['emission'][:,1] - r['emission'][:,0]
         r2['productivityUC'] = r['productivity'][:,1] - r['productivity'][:,0]
         r2['netUC'] = r['net'][:,1] - r['net'][:,0]
-        r2['unreleasedUC'] = r['unreleased'][1,0] - r['unreleased'][:,0]
+        r2['unreleasedUC'] = r['unreleased'][:,1] - r['unreleased'][:,0]
     else:
         r2['burnedUC'] = r['burned'].std(1) * 1.96
         r2['emissionUC'] = r['emission'].std(1) * 1.96
