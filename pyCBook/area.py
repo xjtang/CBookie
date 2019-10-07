@@ -83,6 +83,7 @@ def area_carbon(ori, para, des, period=[2001, 2015], lapse=1, overwrite=False):
         r1 = aggregated(p, actvt)
         r2 = pools(r1.pools)
         r3 = r2.report(period, lapse)
+        r['burned'] = r3['burned'].mean(1)
         r['emission'] = r3['emission'].mean(1)
         r['productivity'] = r3['productivity'].mean(1)
         r['net'] = r3['net'].mean(1)
