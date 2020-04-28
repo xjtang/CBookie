@@ -119,7 +119,8 @@ def book_carbon(pattern, ori, para, des, img='NA', mask='NA', seed='NA', stable=
     count = 0
     log.info('Start booking carbon...')
     for yatsm in yatsm_list:
-        try:
+        if True:
+        #try:
             records = []
             py = get_int(yatsm[1])[0]
             px = -1
@@ -138,7 +139,7 @@ def book_carbon(pattern, ori, para, des, img='NA', mask='NA', seed='NA', stable=
                         px = pixel[0]['px']
                         if ((not stable) | (len(pixel) > 1) |
                             (pixel[0]['break'] > 0) |
-                            (pixel[0]['class'] == cons.FOREST[1])):
+                            (pixel[0]['class'] in cons.REGROW)):
                             if mask != 'NA':
                                 mask3 = mask2[py, px]
                             if mask3 == 0:
@@ -165,9 +166,9 @@ def book_carbon(pattern, ori, para, des, img='NA', mask='NA', seed='NA', stable=
                 log.warning('Line {} all masked.'.format(py))
             np.savez(os.path.join(des,'carbon_r{}.npz'.format(py)), records)
             count += 1
-        except:
-            log.warning('Failed to process line {} pixel {}.'.format(py, px))
-            continue
+        #except:
+        #    log.warning('Failed to process line {} pixel {}.'.format(py, px))
+        #    continue
 
     # nothing is processed, all failed
     if count == 0:

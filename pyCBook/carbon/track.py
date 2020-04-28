@@ -57,6 +57,7 @@ class carbon:
     pname = cons.PNAME
     spname = cons.SPNAME
     forest = cons.FOREST
+    regrow = cons.REGROW
     seb_class = cons.SEB_CLASS
     unclassified = cons.UNCLASSIFIED
 
@@ -65,7 +66,7 @@ class carbon:
     force_end = doy_to_ordinal(cons.FORCE_END)
 
     def __init__(self, para, pixel, seed='NA', se_biomass=[-9999,0],
-                    psize=(0.3*0.3)):
+                    psize=(2.31656358*2.31656358)):
         self.pixel_size = psize
         self.scale_factor2 = self.scale_factor * self.pixel_size
         if se_biomass[0] > -9999:
@@ -117,14 +118,16 @@ class carbon:
 
     def assess_ts(self, ts):
         if len(self.lc) > 0:
+            if ts['class'] == 9:
+                ts['class'] = 26
             if ((ts['class'] == self.lc[-1]) |
-                ((self.lc[-1] == self.forest[1]) &
-                (ts['class'] == self.forest[0]))):
+                ((self.lc[-1] in self.regrow) &
+                (ts['class'] in self.forest))):
                 self.pools[self.pmain]['end'] = ordinal_to_doy(ts['end'])
                 self.emission(self.pmain)
             else:
-                if (self.lc[-1] not in self.forest) & (ts['class'] == self.forest[0]):
-                    ts['class'] = self.forest[1]
+                if (self.lc[-1] not in self.forest) & (ts['class'] in self.forest):
+                    ts['class'] = self.regrow[0]
                 if self.lc[-1] in self.forest:
                     self.deforest(ordinal_to_doy(ts['start'] - 1))
                 else:
@@ -142,7 +145,7 @@ class carbon:
             (self.se_biomass[0] > -9999)):
             biomass = self.se_biomass
         else:
-            if (self.pid > 0) & (ts['class'] == self.forest[1]):
+            if (self.pid > 0) & (ts['class'] in self.regrow):
                 biomass = self.regrow_biomass
             else:
                 biomass = get_biomass(self.p, ts['class'], self.scale_factor2)
