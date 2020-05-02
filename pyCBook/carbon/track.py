@@ -118,11 +118,11 @@ class carbon:
 
     def assess_ts(self, ts):
         if len(self.lc) > 0:
-            if ts['class'] == 9:
+            if (ts['class'] == 9) & self.lc[-1] in [2,4,5,19]:
                 ts['class'] = 26
             if ((ts['class'] == self.lc[-1]) |
-                ((self.lc[-1] in self.regrow) &
-                (ts['class'] in self.forest))):
+                ((self.lc[-1] in self.regrow) & (ts['class'] in self.forest)) |
+                ((self.lc[-1] in self.forest) & (ts['class'] in self.forest))):
                 self.pools[self.pmain]['end'] = ordinal_to_doy(ts['end'])
                 self.emission(self.pmain)
             else:
