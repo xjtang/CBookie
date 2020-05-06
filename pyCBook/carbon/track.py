@@ -64,13 +64,19 @@ class carbon:
     scale_factor = cons.SCALE_FACTOR
     force_start = doy_to_ordinal(cons.FORCE_START)
     force_end = doy_to_ordinal(cons.FORCE_END)
+    track_start = doy_to_ordinal(cons.TRACK_START)
+    track_end = doy_to_ordinal(cons.TRACK_END)
+    forest_min = cons.FOREST_MIN
 
     def __init__(self, para, pixel, seed='NA', se_biomass=[-9999,0],
                     psize=(2.31656358*2.31656358)):
         self.pixel_size = psize
         self.scale_factor2 = self.scale_factor * self.pixel_size
         if se_biomass[0] > -9999:
-            self.se_biomass = [x * self.scale_factor2 for x in se_biomass]
+            if se_biomass[0] >= self.forest_min:
+                self.se_biomass = [x * self.scale_factor2 for x in se_biomass]
+            else:
+                self.se_biomass = [-9999, 0]
         else:
             self.se_biomass = se_biomass
         try:
@@ -85,7 +91,6 @@ class carbon:
         self.px = pixel[0]['px']
         self.py = pixel[0]['py']
         self.regrow_biomass = [x * self.scale_factor2 for x in cons.REGROW_BIOMASS]
-        self.forest_min = cons.FOREST_MIN * self.scale_factor2
         self.dtypes = gen_dtype(1, self.n)
         self.assess_pixel(pixel)
 
@@ -99,36 +104,34 @@ class carbon:
         if len(pixel) == 0:
             self.pools = []
         else:
-            if pixel[0]['start'] < self.force_start:
-                pixel[0]['start'] = self.force_start
-            if (pixel[-1]['break'] == 0) | (pixel[-1]['break'] >= self.force_end):
-                pixel[-1]['end'] = self.force_end
-                pixel[-1]['break'] = 0
-            else:
-                pixel = np.append(pixel, pixel[-1])
-                pixel[-1]['start'] = pixel[-2]['end'] + 1
-                pixel[-1]['end'] = self.force_end
-                pixel[-1]['break'] = 0
-                pixel[-1]['class'] = last_class
+            pixel[0]['start'] = self.track_start
+            pixel[-1]['end'] = self.track_end
+            pixel[-1]['break'] = 0
             for i, x in enumerate(pixel):
                 if i > 0:
                     x['start'] = doy_to_ordinal(self.pools[self.pmain]['end'])+1
+                    if (x['class'] == 9) & (self.lc[-1] in [2,4,5]):
+                        x['class'] = 26
+                if i < len(pixel) - 1:
+                    if (x['class'] == 9) & (pixel[i+1]['class'] in [2,4,5]):
+                        x['class'] = 26
+                    if (x['class'] == 9) & (pixel[i+1]['class'] in [18,19,20]):
+                        x['class'] = pixel[i+1]['class']
+
                 self.assess_ts(x)
             self.pools = np.array(self.pools)
 
     def assess_ts(self, ts):
         if len(self.lc) > 0:
-            if (ts['class'] == 9) & self.lc[-1] in [2,4,5,19]:
-                ts['class'] = 26
             if ((ts['class'] == self.lc[-1]) |
-                ((self.lc[-1] in self.regrow) & (ts['class'] in self.forest)) |
+                ((self.lc[-1] in [26, 18]) & (ts['class'] in self.forest)) |
                 ((self.lc[-1] in self.forest) & (ts['class'] in self.forest))):
                 self.pools[self.pmain]['end'] = ordinal_to_doy(ts['end'])
                 self.emission(self.pmain)
             else:
-                if (self.lc[-1] not in self.forest) & (ts['class'] in self.forest):
+                if (self.lc[-1] not in self.forest) & (ts['class'] in [2,4,5,9]):
                     ts['class'] = self.regrow[0]
-                if self.lc[-1] in self.forest:
+                if (self.lc[-1] in self.forest) | (self.lc[-1] in self.regrow):
                     self.deforest(ordinal_to_doy(ts['start'] - 1))
                 else:
                     if max(self.pools[self.pmain]['biomass'][1]) > 0:
