@@ -167,7 +167,7 @@ class carbon:
         biomass = self.pools[self.pmain]['biomass'][1]
         self.pools.extend(np.array([(self.pname[2], self.spname[4], 99,
                             self.pid, self.px, self.py, self.pixel_size,
-                            start, ordinal_to_doy(self.force_end),
+                            start, ordinal_to_doy(self.track_end),
                             [biomass, np.zeros(self.n)], 'released', [0, 0])],
                             dtype=self.dtypes))
 
@@ -178,7 +178,7 @@ class carbon:
                 self.pid += 1
                 self.pools.extend(np.array([(self.pname[1], x['product'], 99,
                                     self.pid, self.px, self.py, self.pixel_size,
-                                    start, ordinal_to_doy(self.force_end),
+                                    start, ordinal_to_doy(self.track_end),
                                     [biomass * x['fraction'], np.zeros(self.n)],
                                     x['function'], [x['coef1'], x['coef2']])],
                                     dtype=self.dtypes))
