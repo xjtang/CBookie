@@ -96,7 +96,10 @@ def map_carbon(pattern, _time, map, img, ori, des, overwrite=False,
                     px = pixel[0]['px']
                     pixel_pools = pools(pixel)
                     record = pixel_pools.eval_sum(_time)
-                    r[py, px] = record[map][0][1] / (cons.SCALE_FACTOR * pixel_pools.pools[0]['psize'])
+                    if map == 'total':
+                        r[py, px] = (record['emission'][0][1] + record['burned'][0][1]) / (cons.SCALE_FACTOR * pixel_pools.pools[0]['psize'])
+                    else:
+                        r[py, px] = record[map][0][1] / (cons.SCALE_FACTOR * pixel_pools.pools[0]['psize'])
                     #r['biomass'] += record['biomass']
                     #r['emission'] += record['emission']
                     #r['productivity'] += record['productivity']
