@@ -69,6 +69,11 @@ def run_flux(y1, x1, x2, func, coef, scale_factor):
         y2 = coef[0]*np.log(np.exp((y1-coef[1])/coef[0])+(x2-x1)/cons.DIY)+coef[1]
     elif func == 'none':
         y2 = y1
+    elif func == 'dual':
+        if (x2 - x1) >= coef[1] * cons.DIY:
+            y2 = y1 + coef[0] * 25
+        else:
+            y2 = y1 + coef[0] * ((x2 - x1) / cons.DIY)
     else:
         y2 = y1 * 0.0
     y2[(y1 >= 0) & (y2 < 0)] = 0
