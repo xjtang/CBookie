@@ -108,6 +108,9 @@ class carbon:
             pixel[-1]['end'] = self.track_end
             pixel[-1]['break'] = 0
             for i, x in enumerate(pixel):
+                if i == 0:
+                    if x['class'] == 18
+                        x['class'] = 27
                 if i > 0:
                     x['start'] = doy_to_ordinal(self.pools[self.pmain]['end'])+1
                     if (x['class'] == 9) & (self.lc[-1] in [2,4,5]):
@@ -124,7 +127,7 @@ class carbon:
     def assess_ts(self, ts):
         if len(self.lc) > 0:
             if ((ts['class'] == self.lc[-1]) |
-                ((self.lc[-1] in [26, 18]) & (ts['class'] in self.forest)) |
+                ((self.lc[-1] in [27, 26, 18]) & (ts['class'] in self.forest)) |
                 ((self.lc[-1] in self.forest) & (ts['class'] in self.forest))):
                 self.pools[self.pmain]['end'] = ordinal_to_doy(ts['end'])
                 self.emission(self.pmain)
