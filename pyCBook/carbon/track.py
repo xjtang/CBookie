@@ -109,7 +109,7 @@ class carbon:
             pixel[-1]['break'] = 0
             for i, x in enumerate(pixel):
                 if i == 0:
-                    if x['class'] == 18
+                    if x['class'] == 18:
                         x['class'] = 27
                 if i > 0:
                     x['start'] = doy_to_ordinal(self.pools[self.pmain]['end'])+1
