@@ -118,7 +118,7 @@ class carbon:
                 if i < len(pixel) - 1:
                     if (x['class'] == 9) & (pixel[i+1]['class'] in [2,4,5]):
                         x['class'] = 26
-                    if (x['class'] == 9) & (pixel[i+1]['class'] in [18,19,20]):
+                    if (x['class'] == 9) & (pixel[i+1]['class'] in [19,20]):
                         x['class'] = pixel[i+1]['class']
 
                 self.assess_ts(x)
@@ -127,6 +127,7 @@ class carbon:
     def assess_ts(self, ts):
         if len(self.lc) > 0:
             if ((ts['class'] == self.lc[-1]) |
+                ((self.lc[-1] == 27) & (ts['class'] == 18)) |
                 ((self.lc[-1] in [27, 26, 18]) & (ts['class'] in self.forest)) |
                 ((self.lc[-1] in self.forest) & (ts['class'] in self.forest))):
                 self.pools[self.pmain]['end'] = ordinal_to_doy(ts['end'])
