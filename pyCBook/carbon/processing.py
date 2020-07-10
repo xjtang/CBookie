@@ -70,7 +70,7 @@ def run_flux(y1, x1, x2, func, coef, scale_factor):
     elif func == 'none':
         y2 = y1
     elif func == 'dual':
-        if ((x2 - x1) / cons.DIY) >= coef[1]:
+        if ((x2 - x1) / cons.DIY) >= coef[1][0]:
             y2 = y1 + coef[0] * 25
         else:
             y2 = y1 + coef[0] * (x2 - x1) / cons.DIY
