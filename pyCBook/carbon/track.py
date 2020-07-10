@@ -158,11 +158,13 @@ class carbon:
                 biomass = get_biomass(self.p, ts['class'], self.scale_factor2)
         flux = get_flux(self.p, ts['class'])
         biomass2 = [draw(biomass[0], biomass[1], self.seed), np.zeros(self.n)]
+        coef1 = draw(flux['coef1'], flux['coef1_ci'], self.seed)
+        coef2 = draw(flux['coef2'], flux['coef2_ci'], self.seed)
         self.pools.extend(np.array([(self.pname[0], self.spname[0], ts['class'],
                             self.pid, self.px, self.py, self.pixel_size,
                             ordinal_to_doy(ts['start']),
                             ordinal_to_doy(ts['end']), biomass2,
-                            flux['function'], (flux['coef1'], flux['coef2']))],
+                            flux['function'], (coef1, coef2))],
                             dtype=self.dtypes))
         self.emission(self.pmain)
 
@@ -172,8 +174,8 @@ class carbon:
         self.pools.extend(np.array([(self.pname[2], self.spname[4], 99,
                             self.pid, self.px, self.py, self.pixel_size,
                             start, ordinal_to_doy(self.track_end),
-                            [biomass, np.zeros(self.n)], 'released', [0, 0])],
-                            dtype=self.dtypes))
+                            [biomass, np.zeros(self.n)], 'released',
+                            [0*self.seed, 0*self.seed])], dtype=self.dtypes))
 
     def deforest(self, start):
         biomass = self.pools[self.pmain]['biomass'][1]
@@ -184,7 +186,9 @@ class carbon:
                                     self.pid, self.px, self.py, self.pixel_size,
                                     start, ordinal_to_doy(self.track_end),
                                     [biomass * x['fraction'], np.zeros(self.n)],
-                                    x['function'], [x['coef1'], x['coef2']])],
+                                    x['function'],
+                                    [x['coef1'] + (0 * self.seed),
+                                    x['coef2'] + (0 * self.seed)])],
                                     dtype=self.dtypes))
                 if x['product'] == 'burned':
                     self.pools[-1]['pool'] = self.pname[2]

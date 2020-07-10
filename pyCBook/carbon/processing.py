@@ -113,7 +113,7 @@ def gen_dtype(_type, size):
                     ('id', '<u2'), ('px', '<u2'), ('py', '<u2'),
                     ('psize', '<f4'), ('start', '<i4'), ('end', '<i4'),
                     ('biomass', '<f8', (2, size)), ('func', 'U10'),
-                    ('coef', '<f4', (2, ))]
+                    ('coef', '<f4', (2, size))]
     elif _type == 2:
         dtype = [('date', '<i4'), ('burned', '<f8', (size, )),
                     ('emission', '<f8', (size, )),
